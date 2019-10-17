@@ -49,7 +49,7 @@ class OpSuma(Componente):
   def __init__(self,nl,operacion):
 	Componente.__init(self)
 	self.linea = nl
-	selft.operacion = operacion
+	self.operacion = operacion
 	
 #  componente lexico. operadores de multiplicacion
 #  componente lexico. Numeros
