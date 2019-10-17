@@ -45,6 +45,12 @@ class EOF(Componente):
 
 
 # componente lexico.  Operadores de suma
+class OpSuma(Componente):
+  def __init__(self,nl,operacion):
+	Componente.__init(self)
+	self.linea = nl
+	selft.operacion = operacion
+	
 #  componente lexico. operadores de multiplicacion
 #  componente lexico. Numeros
 # componente lexico.  identificadores
