@@ -51,12 +51,57 @@ class OpSuma(Componente):
 	self.linea = nl
 	self.operacion = operacion
 	
+	
 #  componente lexico. operadores de multiplicacion
+class OpMultiplicacion(Componente):
+  def __init__(self,nl,operacion):
+	Componente.__init(self)
+	self.linea = nl
+	self.operacion = operacion
+
+
 #  componente lexico. Numeros
 # componente lexico.  identificadores
+class identificador(Componente, valor):
+  def __init__(self,nl):
+	Componente.__init(self)
+	self.linea = nl
+	self.valor = valor
+
+
 # componente lexico. Palabras reservadas
 # componente lexico. operadores relacionales 
+class OpRelacional(Componente, valor):
+  def __init__(self,nl):
+	Componente.__init(self)
+	self.linea = nl
+	self.operacion = operacion
+
+
 # componente lexico. llaves, parentesis y corchetes 
 # componente lexico. otros simbolos  (punto, dospuntos, coma, punto y coma)
+class punto(Componente, valor):
+  def __init__(self,nl):
+	Componente.__init(self)
+	self.linea = nl
+	
+	
+class dosPuntos(Componente, valor):
+  def __init__(self,nl):
+	Componente.__init(self)
+	self.linea = nl
+
+
+class coma(Componente, valor):
+  def __init__(self,nl):
+	Componente.__init(self)
+	self.linea = nl
+
+
+class puntoComa(Componente, valor):
+  def __init__(self,nl):
+	Componente.__init(self)
+	self.linea = nl
+
 
  
