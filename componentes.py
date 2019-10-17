@@ -33,7 +33,7 @@ class blanco(Componente):
   pass
 
 # componente lexico operador de asignacion
-class OpAsigna (Componente): 
+class OpAsigna(Componente): 
   def __init__(self,nl):
     Componente.__init__(self)
     self.linea=nl
@@ -46,9 +46,10 @@ class EOF(Componente):
 
 # componente lexico.  Operadores de suma
 class OpSuma(Componente):
-  def __init__(self,nl,operacion):
-	Componente.__init(self)
+  def __init__(self, nl, operacion):
+	Componente.__init__(self)
 	self.linea = nl
+	# + o -
 	self.operacion = operacion
 	
 	
@@ -61,6 +62,14 @@ class OpMultiplicacion(Componente):
 
 
 #  componente lexico. Numeros
+
+class Numero(Componente):
+  def __init__(self, nl, tipo):
+    Componente.__init__(self)
+	self.linea = nl
+	# Entero o real
+	self.tipo = tipo
+
 # componente lexico.  identificadores
 class identificador(Componente, valor):
   def __init__(self,nl):
@@ -70,6 +79,14 @@ class identificador(Componente, valor):
 
 
 # componente lexico. Palabras reservadas
+
+class PalabraReservada(Componente):
+  def __init__(self, nl, palabra):
+	Componente.__init__(self)
+	self.linea = nl
+	# PRO-GRAMA,  VAR,  VECTOR,  ENTERO,  REAL,  BOOLEANO,  INICIO,  FIN,  SI,  ENTON-CES, SINO, MIENTRAS, HACER, LEE, ESCRIBE, Y, O, NO, CIERTO y FALSO.
+	self.palabra = palabra
+	
 # componente lexico. operadores relacionales 
 class OpRelacional(Componente, valor):
   def __init__(self,nl):
@@ -79,6 +96,37 @@ class OpRelacional(Componente, valor):
 
 
 # componente lexico. llaves, parentesis y corchetes 
+
+class LlaveApertura(Componente):
+  def __init__(self,nl):
+    Componente.__init__(self)
+    self.linea=nl
+	
+class LlaveCierre(Componente):
+  def __init__(self,nl):
+    Componente.__init__(self)
+    self.linea=nl
+		
+class ParentesisApertura(Componente):
+  def __init__(self,nl):
+    Componente.__init__(self)
+    self.linea=nl
+	
+class ParentesisCierre(Componente):
+  def __init__(self,nl):
+    Componente.__init__(self)
+    self.linea=nl
+	
+class CorcheteApertura(Componente):
+  def __init__(self,nl):
+    Componente.__init__(self)
+    self.linea=nl
+	
+class CorcheteCierre(Componente):
+  def __init__(self,nl):
+    Componente.__init__(self)
+    self.linea=nl
+	
 # componente lexico. otros simbolos  (punto, dospuntos, coma, punto y coma)
 class punto(Componente, valor):
   def __init__(self,nl):
