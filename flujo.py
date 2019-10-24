@@ -15,7 +15,7 @@ class Flujo:
     self.pos= -1
     self.fic=f
 
-  #Devuelve un caracter de la cadenma
+  #Devuelve un caracter de la cadena
   def siguiente(self):
     return self.fic.read(1)
  
@@ -29,5 +29,5 @@ class Flujo:
 
   # Devuelve la cadena en la que estamos leyendo
   def cadena(self):
-    return self.cad
+    return self.fic
 

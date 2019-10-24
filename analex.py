@@ -127,7 +127,7 @@ class Analex:
  ############################################################################
  def Analiza(self):
   l = ""
-  ch=self.flujo.siguiente();
+  ch=self.flujo.siguiente()
   if ch==" ":
     ##acciones si hemos encontrado un blancoi
   elif ch=="\r":
