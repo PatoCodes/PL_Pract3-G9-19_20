@@ -114,7 +114,7 @@ class Analex:
  def EliminaBlancos(self,flujo):
   ch = self.flujo.siguiente()
   while ch and ch == " ":
-   ch = self.flujo.siguiente()
+    ch = self.flujo.siguiente()
   self.flujo.devuelve(ch)
 
  ############################################################################
@@ -129,15 +129,17 @@ class Analex:
   l = ""
   ch=self.flujo.siguiente()
   if ch==" ":
-    ##acciones si hemos encontrado un blancoi
+    #acciones si hemos encontrado un blanco
+    return unaFuncionAparte(ch)
   elif ch=="\r":
     #acciones si hemos encontrado un salto de linea
+    return componentes.nl()
   elif 
-#    completar aqui para todas las categorias lexicasw
+    #completar aqui para todas las categorias lexicas
   elif ch== "\n":
-   ## acciones al encontrar un salto de linea
-   self.nlinea = self.nlinea + 1
-   return self.Analiza()
+    #acciones al encontrar un salto de linea
+    self.nlinea = self.nlinea + 1
+    return self.Analiza()
   elif ch:
     # se ha encontrado un caracter no permitido
     print ("ERROR LEXICO  Linea "+  str(self.nlinea) +" ::  Caracter "+ ch +" invalido ")
@@ -145,6 +147,13 @@ class Analex:
   else:
     # el final de fichero
     return componentes.EOF()
+
+  #Funcion Aparte
+  def unaFuncionAparte(self, ch):
+    while(ch!=" "):
+      ch=self.flujo.siguiente()
+    self.flujo.devuelve(ch)
+    return componentes.blanco()
 
 ############################################################################
 #
@@ -170,4 +179,5 @@ if __name__=="__main__":
       print c
       c=analex.Analiza()
     i=i+1
+
 
