@@ -64,10 +64,12 @@ class OpMultiplicacion(Componente):
 #  componente lexico. Numeros
 
 class Numero(Componente):
-  def __init__(self, nl, tipo):
+  def __init__(self, nl, numero, tipo):
     Componente.__init__(self)
 	self.linea = nl
-	# Entero o real
+  # Valor
+  self.numero = numero
+	# Entero o real (int o real)
 	self.tipo = tipo
 
 # componente lexico.  identificadores

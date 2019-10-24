@@ -56,8 +56,7 @@ class Analex:
   else:
    self.flujo.devuelve(ch)
   if real:
-   v = float(l)  # if ch:
-   # v = int(l[:-1])
+   v = float(l)
   else:
    v = int(l)
   return v
@@ -137,9 +136,15 @@ class Analex:
   elif 
     #completar aqui para todas las categorias lexicas
   elif ch== "\n":
-    #acciones al encontrar un salto de linea
-    self.nlinea = self.nlinea + 1
-    return self.Analiza()
+   ## acciones al encontrar un salto de linea
+   self.nlinea = self.nlinea + 1
+   return componentes.nl()
+  elif ch.isdecimal():
+   resultado = self.TrataNum(self.flujo, ch)
+   if isinstance(resultado, int):
+     return componentes.Numero(self.nlinea, resultado, "int")
+   else:
+     return componentes.Numero(self.nlinea, resultado, "real")
   elif ch:
     # se ha encontrado un caracter no permitido
     print ("ERROR LEXICO  Linea "+  str(self.nlinea) +" ::  Caracter "+ ch +" invalido ")
