@@ -47,18 +47,18 @@ class EOF(Componente):
 # componente lexico.  Operadores de suma
 class OpSuma(Componente):
   def __init__(self, nl, operacion):
-	Componente.__init__(self)
-	self.linea = nl
-	# + o -
-	self.operacion = operacion
+	  Componente.__init__(self)
+	  self.linea = nl
+	  # + o -
+	  self.operacion = operacion
 	
 	
 #  componente lexico. operadores de multiplicacion
 class OpMultiplicacion(Componente):
   def __init__(self,nl,operacion):
-	Componente.__init(self)
-	self.linea = nl
-	self.operacion = operacion
+	  Componente.__init__(self)
+	  self.linea = nl
+	  self.operacion = operacion
 
 
 #  componente lexico. Numeros
@@ -66,35 +66,35 @@ class OpMultiplicacion(Componente):
 class Numero(Componente):
   def __init__(self, nl, numero, tipo):
     Componente.__init__(self)
-	self.linea = nl
-  # Valor
-  self.numero = numero
-	# Entero o real (int o real)
-	self.tipo = tipo
+    self.linea = nl
+    # Valor
+    self.numero = numero
+	  # Entero o real (int o real)
+    self.tipo = tipo
 
 # componente lexico.  identificadores
-class identificador(Componente, valor):
-  def __init__(self,nl):
-	Componente.__init(self)
-	self.linea = nl
-	self.valor = valor
+class identificador(Componente):
+  def __init__(self, nl, valor):
+	  Componente.__init__(self)
+	  self.linea = nl
+	  self.valor = valor
 
 
 # componente lexico. Palabras reservadas
 
 class PalabraReservada(Componente):
   def __init__(self, nl, palabra):
-	Componente.__init__(self)
-	self.linea = nl
-	# PRO-GRAMA,  VAR,  VECTOR,  ENTERO,  REAL,  BOOLEANO,  INICIO,  FIN,  SI,  ENTON-CES, SINO, MIENTRAS, HACER, LEE, ESCRIBE, Y, O, NO, CIERTO y FALSO.
-	self.palabra = palabra
+	  Componente.__init__(self)
+	  self.linea = nl
+	  # PRO-GRAMA,  VAR,  VECTOR,  ENTERO,  REAL,  BOOLEANO,  INICIO,  FIN,  SI,  ENTON-CES, SINO, MIENTRAS, HACER, LEE, ESCRIBE, Y, O, NO, CIERTO y FALSO.
+	  self.palabra = palabra
 	
 # componente lexico. operadores relacionales 
-class OpRelacional(Componente, valor):
-  def __init__(self,nl):
-	Componente.__init(self)
-	self.linea = nl
-	self.operacion = operacion
+class OpRelacional(Componente):
+  def __init__(self,nl,operacion):
+	  Componente.__init__(self)
+	  self.linea = nl
+	  self.operacion = operacion
 
 
 # componente lexico. llaves, parentesis y corchetes 
@@ -130,28 +130,28 @@ class CorcheteCierre(Componente):
     self.linea=nl
 	
 # componente lexico. otros simbolos  (punto, dospuntos, coma, punto y coma)
-class punto(Componente, valor):
+class punto(Componente):
   def __init__(self,nl):
-	Componente.__init(self)
-	self.linea = nl
+	  Componente.__init__(self)
+	  self.linea = nl
 	
 	
-class dosPuntos(Componente, valor):
+class dosPuntos(Componente):
   def __init__(self,nl):
-	Componente.__init(self)
-	self.linea = nl
+	  Componente.__init__(self)
+	  self.linea = nl
 
 
-class coma(Componente, valor):
+class coma(Componente):
   def __init__(self,nl):
-	Componente.__init(self)
-	self.linea = nl
+	  Componente.__init__(self)
+	  self.linea = nl
 
 
-class puntoComa(Componente, valor):
+class puntoComa(Componente):
   def __init__(self,nl):
-	Componente.__init(self)
-	self.linea = nl
+	  Componente.__init__(self)
+	  self.linea = nl
 
 
  

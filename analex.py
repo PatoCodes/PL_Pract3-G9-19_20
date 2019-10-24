@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import componentes
-import errores
+#import errores
 import flujo
 import string
 import sys
 
 from sys import argv
-from sets import ImmutableSet
+#from sets import FrozenSet
 
 class Analex:
  PR = frozenset(["PROGRAMA", "VAR", "VECTOR", "DE", "ENTERO", "REAL", "BOOLEANO", "INICIO","PROC","FUNCION",
@@ -52,7 +52,8 @@ class Analex:
      ch = self.flujo.siguiente()
      self.flujo.devuelve(ch)
    else:
-    raise errores.ErrorLexico("Numero real erroneo")
+     pass
+    #raise errores.ErrorLexico("Numero real erroneo")
   else:
    self.flujo.devuelve(ch)
   if real:
@@ -73,7 +74,7 @@ class Analex:
  def TrataIdent(self,flujo, ch):
   l = ch
   ch = self.flujo.siguiente()
-  while ch and (ch in string.letters or ch in string.digits):
+  while ch and (ch in string.ascii_letters or ch in string.digits):
    l += ch
    ch = self.flujo.siguiente()
   if ch :
@@ -100,7 +101,7 @@ class Analex:
     #self.Analiza()
    else:
     s="ERROR LEXICO Linea "+str(ini) +":: Comentario abierto y no cerrado antes de finalizar el fichero"
-    print s
+    print(s)
    # raise errores.ErrorLexico(s)
  ############################################################################
  #
@@ -133,8 +134,6 @@ class Analex:
   elif ch=="\r":
     #acciones si hemos encontrado un salto de linea
     return componentes.nl()
-  elif 
-    #completar aqui para todas las categorias lexicas
   elif ch== "\n":
    ## acciones al encontrar un salto de linea
    self.nlinea = self.nlinea + 1
@@ -181,7 +180,7 @@ if __name__=="__main__":
     #inciamos el analisis
     c=analex.Analiza()
     while c.cat!="EOF" :
-      print c
+      print(c)
       c=analex.Analiza()
     i=i+1
 
