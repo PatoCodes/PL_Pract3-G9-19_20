@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import componentes
-#import errores
+import errores
 import flujo
 import string
 import sys
@@ -52,8 +52,7 @@ class Analex:
      ch = self.flujo.siguiente()
      self.flujo.devuelve(ch)
    else:
-     pass
-    #raise errores.ErrorLexico("Numero real erroneo")
+     raise errores.ErrorLexico("Numero real erroneo")
   else:
    self.flujo.devuelve(ch)
   if real:
@@ -80,6 +79,13 @@ class Analex:
   if ch :
    self.flujo.devuelve(ch)
   return l
+
+#Funcion Aparte
+ def TrataBlanco(self, ch):
+   while(ch == " "):
+     ch=self.flujo.siguiente()
+   self.flujo.devuelve(ch)
+   return componentes.blanco()
 
   ############################################################################
   #
@@ -128,9 +134,11 @@ class Analex:
  def Analiza(self):
   l = ""
   ch=self.flujo.siguiente()
-  if ch==" ":
+  if ch=="+":
+    return componentes.OpSuma(self.nlinea,"+")
+  elif ch==" ":
     #acciones si hemos encontrado un blanco
-    return unaFuncionAparte(ch)
+    return self.TrataBlanco(ch)
   elif ch=="\r":
     #acciones si hemos encontrado un salto de linea
     return componentes.nl()
@@ -152,12 +160,7 @@ class Analex:
     # el final de fichero
     return componentes.EOF()
 
-  #Funcion Aparte
-  def unaFuncionAparte(self, ch):
-    while(ch!=" "):
-      ch=self.flujo.siguiente()
-    self.flujo.devuelve(ch)
-    return componentes.blanco()
+  
 
 ############################################################################
 #
