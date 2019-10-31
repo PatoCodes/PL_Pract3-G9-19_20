@@ -82,7 +82,8 @@ class Analex:
 
 #Funcion Aparte
  def TrataBlanco(self, ch):
-   while(ch == " "):
+   ch = self.flujo.siguiente()
+   while(ch and ch == " "):
      ch=self.flujo.siguiente()
    self.flujo.devuelve(ch)
    return componentes.blanco()
@@ -146,7 +147,7 @@ class Analex:
    ## acciones al encontrar un salto de linea
    self.nlinea = self.nlinea + 1
    return componentes.nl()
-  elif ch.isdecimal():
+  elif ch.isdigit():
    resultado = self.TrataNum(self.flujo, ch)
    if isinstance(resultado, int):
      return componentes.Numero(self.nlinea, resultado, "int")
