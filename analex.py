@@ -7,7 +7,6 @@ import string
 import sys
 
 from sys import argv
-#from sets import FrozenSet
 
 class Analex:
  PR = frozenset(["PROGRAMA", "VAR", "VECTOR", "DE", "ENTERO", "REAL", "BOOLEANO", "INICIO","PROC","FUNCION",
@@ -42,7 +41,7 @@ class Analex:
   while ch and ch in string.digits:
    l += ch
    ch = self.flujo.siguiente()
-  if ch == ".":
+  if ch and ch == ".":
    l += ch
    real = True
    ch = self.flujo.siguiente()
@@ -50,10 +49,11 @@ class Analex:
     while ch and ch in string.digits:
      l += ch
      ch = self.flujo.siguiente()
+    if ch:
      self.flujo.devuelve(ch)
    else:
      raise errores.ErrorLexico("Numero real erroneo")
-  else:
+  elif ch:
    self.flujo.devuelve(ch)
   if real:
    v = float(l)
@@ -83,9 +83,10 @@ class Analex:
 #Funcion Aparte
  def TrataBlanco(self, ch):
    ch = self.flujo.siguiente()
-   while(ch and ch == " "):
+   while ch and ch == " ":
      ch=self.flujo.siguiente()
-   self.flujo.devuelve(ch)
+   if ch:
+    self.flujo.devuelve(ch)
    return componentes.blanco()
 
   ############################################################################
