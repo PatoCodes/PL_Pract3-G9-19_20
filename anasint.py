@@ -36,6 +36,6 @@ if __name__=="__main__":
     S = Sintactico(anlex)
     if S.Programa():
       print ("Analisis sintactico SATISFACTORIO. Fichero :", filename, "CORRECTO")
-     else:
-       print ("Analisis sintactico CON ERRORES. Fichero :", filename, "ERRONEO")
+    else:
+      print ("Analisis sintactico CON ERRORES. Fichero :", filename, "ERRONEO")
 
