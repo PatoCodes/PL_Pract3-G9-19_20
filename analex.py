@@ -136,7 +136,7 @@ class Analex:
  def Analiza(self):
   l = ""
   ch=self.flujo.siguiente()
-  elif ch==" ":
+  if ch==" ":
     #acciones si hemos encontrado un blanco
     return self.TrataBlanco(ch)
   elif ch=="\r":
