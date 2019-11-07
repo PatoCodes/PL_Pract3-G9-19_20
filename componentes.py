@@ -130,25 +130,25 @@ class CorcheteCierre(Componente):
     self.linea=nl
 	
 # componente lexico. otros simbolos  (punto, dospuntos, coma, punto y coma)
-class punto(Componente):
+class Punto(Componente):
   def __init__(self,nl):
 	  Componente.__init__(self)
 	  self.linea = nl
 	
 	
-class dosPuntos(Componente):
+class DosPuntos(Componente):
   def __init__(self,nl):
 	  Componente.__init__(self)
 	  self.linea = nl
 
 
-class coma(Componente):
+class Coma(Componente):
   def __init__(self,nl):
 	  Componente.__init__(self)
 	  self.linea = nl
 
 
-class puntoComa(Componente):
+class PuntoComa(Componente):
   def __init__(self,nl):
 	  Componente.__init__(self)
 	  self.linea = nl

@@ -70,7 +70,7 @@ class Analex:
  #  Devuelve: Devuelve una cadena de caracteres que representa un identificador
  #
  ############################################################################
- def TrataIdent(self,flujo, ch):
+ def TrataIdent(self, flujo, ch):
   l = ch
   ch = self.flujo.siguiente()
   while ch and (ch in string.ascii_letters or ch in string.digits):
@@ -136,22 +136,70 @@ class Analex:
  def Analiza(self):
   l = ""
   ch=self.flujo.siguiente()
+
+  ## Acciones si hemos encontrado un blanco
   if ch==" ":
-    #acciones si hemos encontrado un blanco
     return self.TrataBlanco(ch)
+
+  ## Acciones si hemos encontrado un salto de linea
   elif ch=="\r":
-    #acciones si hemos encontrado un salto de linea
     return componentes.Nl()
   elif ch== "\n":
-   ## acciones al encontrar un salto de linea
    self.nlinea = self.nlinea + 1
    return componentes.Nl()
+
+  ## Acciones al encontrar un número
   elif ch.isdigit():
    resultado = self.TrataNum(self.flujo, ch)
    if isinstance(resultado, int):
+     ## Int
      return componentes.Numero(self.nlinea, resultado, "int")
    else:
+     ## Real
      return componentes.Numero(self.nlinea, resultado, "real")
+
+  ## Acciones al encontrar un identificador
+  elif ch.isalpha():
+    resultado = self.TrataIdent(self.flujo, ch)
+    #Palabra reservada
+    if resultado in self.PR:
+      return componentes.PalabraReservada(self.nlinea, resultado)
+    #Identificador
+    else:
+      return componentes.Identificador(self.nlinea, resultado)
+
+  ## Parentesis, llaves y corchetes
+  elif ch =="(":
+    return componentes.ParentesisApertura(self.nlinea)
+  elif ch ==")":
+    return componentes.ParentesisCierre(self.nlinea)
+  elif ch =="{":
+    return componentes.LlaveApertura(self.nlinea)
+  elif ch =="}":
+    return componentes.LlaveCierre(self.nlinea)
+  elif ch =="[":
+    return componentes.CorcheteApertura(self.nlinea)
+  elif ch =="]":
+    return componentes.CorcheteCierre(self.nlinea)
+
+  ## Dos puntos y operador de asignacion
+  elif ch == ":":
+    # Comprobamos si es asignación
+    ch = self.flujo.siguiente()
+    if ch == "=":
+      return componentes.OpAsigna(self.nlinea)
+    else:
+      self.flujo.devuelve(ch)
+      return componentes.DosPuntos(self.nlinea)
+
+  ## Punto y coma, punto, coma
+  elif ch == ";":
+    return componentes.PuntoComa(self.nlinea)
+  elif ch == ".":
+    return componentes.Punto(self.nlinea)
+  elif ch == ",":
+    return componentes.Coma(self.nlinea)
+
   elif ch:
     # se ha encontrado un caracter no permitido
     print ("ERROR LEXICO  Linea "+  str(self.nlinea) +" ::  Caracter "+ ch +" invalido ")
