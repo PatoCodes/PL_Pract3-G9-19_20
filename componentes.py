@@ -25,11 +25,11 @@ class Componente:
       return self.cat
 
 # componente lexico salto de linea
-class nl(Componente):
+class Nl(Componente):
   pass
 
 # componente lexico espacios en blanco
-class blanco(Componente):
+class Blanco(Componente):
   pass
 
 # componente lexico operador de asignacion
@@ -73,7 +73,7 @@ class Numero(Componente):
     self.tipo = tipo
 
 # componente lexico.  identificadores
-class identificador(Componente):
+class Identificador(Componente):
   def __init__(self, nl, valor):
 	  Componente.__init__(self)
 	  self.linea = nl
@@ -86,7 +86,7 @@ class PalabraReservada(Componente):
   def __init__(self, nl, palabra):
 	  Componente.__init__(self)
 	  self.linea = nl
-	  # PRO-GRAMA,  VAR,  VECTOR,  ENTERO,  REAL,  BOOLEANO,  INICIO,  FIN,  SI,  ENTON-CES, SINO, MIENTRAS, HACER, LEE, ESCRIBE, Y, O, NO, CIERTO y FALSO.
+	  # PROGRAMA,  VAR,  VECTOR,  ENTERO,  REAL,  BOOLEANO,  INICIO,  FIN,  SI,  ENTON-CES, SINO, MIENTRAS, HACER, LEE, ESCRIBE, Y, O, NO, CIERTO y FALSO.
 	  self.palabra = palabra
 	
 # componente lexico. operadores relacionales 

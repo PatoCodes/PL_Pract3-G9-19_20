@@ -87,7 +87,7 @@ class Analex:
      ch=self.flujo.siguiente()
    if ch:
     self.flujo.devuelve(ch)
-   return componentes.blanco()
+   return componentes.Blanco()
 
   ############################################################################
   #
@@ -141,11 +141,11 @@ class Analex:
     return self.TrataBlanco(ch)
   elif ch=="\r":
     #acciones si hemos encontrado un salto de linea
-    return componentes.nl()
+    return componentes.Nl()
   elif ch== "\n":
    ## acciones al encontrar un salto de linea
    self.nlinea = self.nlinea + 1
-   return componentes.nl()
+   return componentes.Nl()
   elif ch.isdigit():
    resultado = self.TrataNum(self.flujo, ch)
    if isinstance(resultado, int):
