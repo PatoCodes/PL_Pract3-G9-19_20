@@ -199,6 +199,39 @@ class Analex:
     return componentes.Punto(self.nlinea)
   elif ch == ",":
     return componentes.Coma(self.nlinea)
+  
+  
+  elif ch == "=":
+    return componentes.OpRelacional(self.nlinea, "=")
+  elif ch == "<":
+    ch = self.flujo.siguiente()
+    if ch:
+      return componentes.OpRelacional(self.nlinea, "<")
+    elif ch == ">":
+      return componentes.OpRelacional(self.nlinea, "<>")
+    elif ch == "=":
+      return componentes.OpRelacional(self.nlinea, "<=")
+    else:
+      self.flujo.devuelve(ch)
+      return componentes.OpRelacional(self.nlinea, "<")
+  elif ch == ">":
+    ch = self.flujo.siguiente()
+    if ch:
+      return componentes.OpRelacional(self.nlinea, ">")
+    elif ch == "=":
+      return componentes.OpRelacional(self.nlinea, ">=")
+    else:
+      self.flujo.devuelve(ch)
+      return componentes.OpRelacional(self.nlinea, ">")
+  elif ch == "+":
+    return componentes.OpSuma(self.nlinea, "+")
+  elif ch == "-":
+    return componentes.OpSuma(self.nlinea, "-")
+  elif ch == "*":
+    return componentes.OpMultiplicacion(self.nlinea, "*")
+  elif ch == "/":
+    return componentes.OpMultiplicacion(self.nlinea, "/")
+
 
   elif ch:
     # se ha encontrado un caracter no permitido
