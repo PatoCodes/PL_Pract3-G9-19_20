@@ -83,11 +83,10 @@ class Analex:
 #Funcion Aparte
  def TrataBlanco(self, ch):
    ch = self.flujo.siguiente()
-   while ch and ch == " ":
+   while ch and (ch == " " or ch == "\t"):
      ch=self.flujo.siguiente()
    if ch:
     self.flujo.devuelve(ch)
-   return componentes.Blanco()
 
   ############################################################################
   #
@@ -100,17 +99,11 @@ class Analex:
   ############################################################################
  def TrataComent(self, flujo):
    ch = self.flujo.siguiente()
-   ini=self.nlinea
-   while ch and ch!="}":
+   while ch and (ch!="\r" and ch!="\n"):
     ch = self.flujo.siguiente()
-  #  print "caracter", ch
-   if ch and ch=="}":
-    pass #self.flujo.devuelve(ch)
-    #self.Analiza()
-   else:
-    s="ERROR LEXICO Linea "+str(ini) +":: Comentario abierto y no cerrado antes de finalizar el fichero"
-    print(s)
-   # raise errores.ErrorLexico(s)
+   if ch:
+    self.flujo.devuelve(ch)
+
  ############################################################################
  #
  #  Funcion: EliminaBlancos
@@ -137,16 +130,17 @@ class Analex:
   l = ""
   ch=self.flujo.siguiente()
 
-  ## Acciones si hemos encontrado un blanco
-  if ch==" ":
-    return self.TrataBlanco(ch)
+  ## Acciones si hemos encontrado un blanco o un tabulador
+  if ch==" " or ch=="\t":
+    self.TrataBlanco(ch)
+    return self.Analiza()
 
   ## Acciones si hemos encontrado un salto de linea
   elif ch=="\r":
-    return componentes.Nl()
+    return self.Analiza()
   elif ch== "\n":
    self.nlinea = self.nlinea + 1
-   return componentes.Nl()
+   return self.Analiza()
 
   ## Acciones al encontrar un número
   elif ch.isdigit():
@@ -200,14 +194,12 @@ class Analex:
   elif ch == ",":
     return componentes.Coma(self.nlinea)
   
-  
+  ## Operadores relacionales
   elif ch == "=":
     return componentes.OpRelacional(self.nlinea, "=")
   elif ch == "<":
     ch = self.flujo.siguiente()
-    if ch:
-      return componentes.OpRelacional(self.nlinea, "<")
-    elif ch == ">":
+    if ch == ">":
       return componentes.OpRelacional(self.nlinea, "<>")
     elif ch == "=":
       return componentes.OpRelacional(self.nlinea, "<=")
@@ -216,21 +208,28 @@ class Analex:
       return componentes.OpRelacional(self.nlinea, "<")
   elif ch == ">":
     ch = self.flujo.siguiente()
-    if ch:
-      return componentes.OpRelacional(self.nlinea, ">")
-    elif ch == "=":
+    if ch == "=":
       return componentes.OpRelacional(self.nlinea, ">=")
     else:
       self.flujo.devuelve(ch)
       return componentes.OpRelacional(self.nlinea, ">")
+
+  ## Operadores aritméticos
   elif ch == "+":
     return componentes.OpSuma(self.nlinea, "+")
   elif ch == "-":
     return componentes.OpSuma(self.nlinea, "-")
   elif ch == "*":
     return componentes.OpMultiplicacion(self.nlinea, "*")
+  ## Posiblemente comentario
   elif ch == "/":
-    return componentes.OpMultiplicacion(self.nlinea, "/")
+    ch = self.flujo.siguiente()
+    if ch == "/":
+      self.TrataComent(self.flujo)
+      return self.Analiza()
+    else:
+      self.flujo.devuelve(ch)
+      return componentes.OpMultiplicacion(self.nlinea, "/")
 
 
   elif ch:
