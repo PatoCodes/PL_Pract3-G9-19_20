@@ -136,8 +136,6 @@ class Analex:
  def Analiza(self):
   l = ""
   ch=self.flujo.siguiente()
-  if ch=="+":
-    return componentes.OpSuma(self.nlinea,"+")
   elif ch==" ":
     #acciones si hemos encontrado un blanco
     return self.TrataBlanco(ch)
