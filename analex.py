@@ -152,6 +152,40 @@ class Analex:
      return componentes.Numero(self.nlinea, resultado, "int")
    else:
      return componentes.Numero(self.nlinea, resultado, "real")
+  
+  
+  elif ch == "=":
+    return componentes.OpRelacional(self.nlinea, "=")
+  elif ch == "<":
+    ch = self.flujo.siguiente()
+    if ch:
+      return componentes.OpRelacional(self.nlinea, "<")
+    elif ch == ">":
+      return componentes.OpRelacional(self.nlinea, "<>")
+    elif ch == "=":
+      return componentes.OpRelacional(self.nlinea, "<=")
+    else:
+      self.flujo.devuelve(ch)
+      return componentes.OpRelacional(self.nlinea, "<")
+  elif ch == ">":
+    ch = self.flujo.siguiente()
+    if ch:
+      return componentes.OpRelacional(self.nlinea, ">")
+    elif ch == "=":
+      return componentes.OpRelacional(self.nlinea, ">=")
+    else:
+      self.flujo.devuelve(ch)
+      return componentes.OpRelacional(self.nlinea, ">")
+  elif ch == "+":
+    return componentes.OpSuma(self.nlinea, "+")
+  elif ch == "-":
+    return componentes.OpSuma(self.nlinea, "-")
+  elif ch == "*":
+    return componentes.OpMultiplicacion(self.nlinea, "*")
+  elif ch == "/":
+    return componentes.OpMultiplicacion(self.nlinea, "/")
+
+
   elif ch:
     # se ha encontrado un caracter no permitido
     print ("ERROR LEXICO  Linea "+  str(self.nlinea) +" ::  Caracter "+ ch +" invalido ")
