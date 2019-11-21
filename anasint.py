@@ -39,3 +39,5 @@ if __name__=="__main__":
     else:
       print ("Analisis sintactico CON ERRORES. Fichero :", filename, "ERRONEO")
 
+def Programa():
+  pass
