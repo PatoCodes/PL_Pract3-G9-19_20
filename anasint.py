@@ -22,12 +22,19 @@ class Sintactico:
 
 # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
-    if nerr == 1:
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA")
+    if nerr == 1: #PROGRAMA
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA en la cabecera del programa")
+    elif nerr == 2: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera un identificador")
  
 # TERMINALES
   def Programa(self):
-    pass
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
+      #<Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
+      self.Avanza()
+    else:
+      self.Error(1, self.token)    
+  
 
 
 ########################################################
