@@ -17,6 +17,9 @@ class Sintactico:
     self.lexico= lexico
     self.token=self.lexico.Analiza()
 
+ def siguiente(self):
+    self.token=self.lexico.Analiza()
+
 # Funcion que muestra los mensajes de error
  def Error(self, nerr, tok):
      if nerr == 1:
