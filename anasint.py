@@ -30,8 +30,11 @@ class Sintactico:
     pass
 
   def decl_var(self):
-    pass
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
+      # <decl_var> → VAR <lista_id> : <tipo> ; <decl_v>
+      pass
 
+ 
 
 ########################################################
 ##
