@@ -36,6 +36,12 @@ class Sintactico:
       self.Error(1, self.token)    
   
 
+  def decl_var(self):
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
+      # <decl_var> → VAR <lista_id> : <tipo> ; <decl_v>
+      pass
+
+ 
 
 ########################################################
 ##
