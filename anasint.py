@@ -17,14 +17,15 @@ class Sintactico:
     self.lexico= lexico
     self.token=self.lexico.Analiza()
 
- def siguiente(self):
-    self.token=self.lexico.Analiza()
-
 # Funcion que muestra los mensajes de error
  def Error(self, nerr, tok):
      if nerr == 1:
          print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA")
  
+# TERMINALES
+ def Programa(self):
+  pass
+
 ########################################################
 ##
 ## PRograma principal que lanza el analizador sintactico
@@ -42,5 +43,3 @@ if __name__=="__main__":
     else:
       print ("Analisis sintactico CON ERRORES. Fichero :", filename, "ERRONEO")
 
-def Programa():
-  pass
