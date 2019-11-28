@@ -26,6 +26,9 @@ class Sintactico:
   def Programa(self):
     pass
 
+  def decl_var(self):
+    pass
+
 
 ########################################################
 ##
