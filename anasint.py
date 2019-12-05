@@ -23,17 +23,55 @@ class Sintactico:
 # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
     if nerr == 1: #PROGRAMA
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA en la cabecera del programa")
-    elif nerr == 2: #identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera un identificador")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera PROGRAMA en la cabecera del programa")
+    elif nerr == 2: #Identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador")
+    elif nerr == 3: #Falta punto y coma
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
+    elif nerr == 4: #Programa debe acabar con .
+      print ("Linea: " + str(self.token.linea) + "  ERROR: La definición del programa debe acabar con un .")
+    elif nerr == 5: #Se deben declarar variables
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración de variables tras la cabecera.")
+    elif nerr == 6: #Se deben declarar instrucciones
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración de instrucciones tras la cabecera.")
+    
+    
  
 # TERMINALES
   def Programa(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
       #<Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
       self.Avanza()
+      if self.token.cat == "Identificador":
+        self.Avanza()
+        if self.token.cat == "PuntoComa":
+          self.Avanza()
+          if self.decl_var():
+            self.Avanza()
+            if self.instrucciones():
+              self.Avanza()
+              if self.token.cat == "Punto":
+                #Analizado con exito
+                return True
+              else:
+                self.Error(4, self.token)
+                return False
+            else:
+              self.Error(6, self.token)
+              return False
+          else:
+            self.Error(5, self.token)
+            return False
+        else:
+          self.Error(3, self.token)
+          return False
+      else:
+        self.Error(2, self.token)
+        return False
     else:
-      self.Error(1, self.token)    
+      self.Error(1, self.token) 
+      return False
+      
   
 
   def decl_var(self):
