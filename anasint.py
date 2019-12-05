@@ -42,6 +42,10 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ','")
     elif nerr == 10: #Tipo
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo o un vector")
+    elif nerr == 11: #INICIO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba INICIO")
+    elif nerr == 12: #FIN
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN"
     elif nerr == 13: #Inicio corchete
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba '['")
     elif nerr == 14: #Número para índice
@@ -51,10 +55,8 @@ class Sintactico:
     elif nerr == 16: #DE
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera la palabra DE para indicar el tipo de un vector")
     elif nerr == 19: #TIPO VALIDO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")
-
-
-
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")    
+    
   # No Terminal Programa
   def Programa(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
@@ -145,6 +147,7 @@ class Sintactico:
       return False
 
   def lista_id(self):
+    #<lista_id> → id <resto_listaid>	
     if self.token.cat == "Identificador":
       self.Avanza()
       return self.resto_listaid()
@@ -153,6 +156,7 @@ class Sintactico:
       return False
 
   def resto_listaid(self):
+    #<resto_listaid> →  , <lista_id>	
     if self.token.cat == "Coma":
       self.Avanza()
       return self.lista_id()
@@ -204,14 +208,6 @@ class Sintactico:
     else:
       self.Error(19, self.token)
       return False
-
-
-  def instrucciones(self):
-    return True
-
-
-
- 
 
 ########################################################
 ##
