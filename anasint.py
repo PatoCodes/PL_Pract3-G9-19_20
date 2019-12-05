@@ -23,9 +23,9 @@ class Sintactico:
 # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
     if nerr == 1: #PROGRAMA
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA en la cabecera del programa")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera PROGRAMA en la cabecera del programa")
     elif nerr == 2: #identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera un identificador")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera un identificador")
     elif nerr == 3: #Falta punto y coma
       print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
     elif nerr == 4: #Programa debe acabar con .
@@ -33,13 +33,18 @@ class Sintactico:
     elif nerr == 5: #Categorías despues del final de fichero
       print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
     elif nerr == 6: #decl_var
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba una delaración de variable o una intrucción")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una intrucción")
     elif nerr == 7: #:
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ':'")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':'")
     elif nerr == 8: #;
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ';'")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ';'")
     elif nerr == 9: #,
-      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ','")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ','")
+    elif nerr == 11: #INICIO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba INICIO")
+    elif nerr == 12: #FIN
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN"
+    
     
   # No Terminal Programa
   def Programa(self):
@@ -131,11 +136,24 @@ class Sintactico:
       return False
 
       
-  
   def instrucciones(self):
-    return True
+    #<instrucciones> → INICIO <lista_inst> FIN
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+      if lista_inst():
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":            
+          return True
+        else:
+          self.Error(12, self.token)
+          return False
+      else:
+        return False
+    else:
+      self.Error(11, self.token)
+      return False
+
 
   def lista_id(self):
+    #<lista_id> → id <resto_listaid>	
     if self.token.cat == "Identificador":
       self.Avanza()
       return self.resto_listaid()
@@ -144,6 +162,7 @@ class Sintactico:
       return False
 
   def resto_listaid(self):
+    #<resto_listaid> →  , <lista_id>	
     if self.token.cat == "Coma":
       self.Avanza()
       return self.lista_id()
@@ -157,8 +176,6 @@ class Sintactico:
   def tipo(self):
     return True
 
-  def decl_v(self):
-    return True
 
 
  
