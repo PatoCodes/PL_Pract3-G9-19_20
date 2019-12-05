@@ -41,10 +41,7 @@ class Sintactico:
     elif nerr == 9: #,
       print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ','")
     
-    
-    
- 
-# TERMINALES
+  # No Terminal Programa
   def Programa(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
       #<Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
@@ -79,7 +76,8 @@ class Sintactico:
     else:
       self.Error(1, self.token) 
       return False
-      
+
+  # No Terminal Decl_Var  
   def decl_var(self):
     # <decl_var> -> VAR <lista_id> : <tipo> ; <decl_v>
     if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
@@ -90,10 +88,7 @@ class Sintactico:
           if self.tipo():
             if self.token.cat == "PuntoComa":
               self.Avanza()
-              if self.decl_v():
-                return True
-              else:
-                return False
+              return self.decl_v()
             else:
               self.Error(8, self.token)
               return False
@@ -111,18 +106,35 @@ class Sintactico:
         self.Error(6, self.token)
         return False
   
+  #  No Terminal Decl_V
   def decl_v(self):
     if self.lista_id():
       #<decl_v> → <lista_id> : <tipo> ; <decl_v>
+      if self.token.cat == "DosPuntos":
+        self.Avanza()
+        if self.tipo():
+          if self.token.cat == "PuntoComa":
+            self.Avanza()
+            return self.decl_v()
+          else:
+            self.Error(8, self.token)
+            return False
+        else:
+          return False
+      else:
+        self.Error(7, self.token)
+        return False
     elif self.token.cat in ["INICIO"]:
       #Siguientes
       return True
     else:
+      return False
+
       
   
   def instrucciones(self):
     return True
-    
+
   def lista_id(self):
     if self.token.cat == "Identificador":
       self.Avanza()
