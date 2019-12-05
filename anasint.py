@@ -26,22 +26,58 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA en la cabecera del programa")
     elif nerr == 2: #identificador
       print ("Linea: " + str(self.token.linea) + "  ERROR Se espera un identificador")
+    elif nerr == 3: #Falta punto y coma
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
+    elif nerr == 4: #Programa debe acabar con .
+      print ("Linea: " + str(self.token.linea) + "  ERROR: La definición del programa debe acabar con un .")
+    elif nerr == 5: #Categorías despues del final de fichero
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
     elif nerr == 6: #identificador
       print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba una delaración de variable o una intrucción")
     elif nerr == 7: #identificador
       print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ':'")
     elif nerr == 8: #identificador
       print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ';'")
+    
+    
+    
  
 # TERMINALES
   def Programa(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
       #<Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
       self.Avanza()
+      if self.token.cat == "Identificador":
+        self.Avanza()
+        if self.token.cat == "PuntoComa":
+          self.Avanza()
+          if self.decl_var():
+            if self.instrucciones():
+              if self.token.cat == "Punto":
+                #FINAL DE FICHERO
+                self.Avanza()
+                if self.token.cat == "EOF":
+                  return True
+                else:
+                  self.Error(5, self.token)
+                  return False
+              else:
+                self.Error(4, self.token)
+                return False
+            else:
+              return False
+          else:
+            return False
+        else:
+          self.Error(3, self.token)
+          return False
+      else:
+        self.Error(2, self.token)
+        return False
     else:
-      self.Error(1, self.token)    
-  
-
+      self.Error(1, self.token) 
+      return False
+      
   def decl_var(self):
     # <decl_var> -> VAR <lista_id> : <tipo> ; <decl_v>
     if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
@@ -73,13 +109,13 @@ class Sintactico:
       return False
   
   def lista_id(self):
-    pass
+    return True
 
   def tipo(self):
-    pass
+    return True
 
   def decl_v(self):
-    pass
+    return True
 
  
 
