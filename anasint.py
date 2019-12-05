@@ -32,12 +32,14 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: La definición del programa debe acabar con un .")
     elif nerr == 5: #Categorías despues del final de fichero
       print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
-    elif nerr == 6: #identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración de variables o instrucciones")
-    elif nerr == 7: #identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':'")
-    elif nerr == 8: #identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ';'")
+    elif nerr == 6: #decl_var
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba una delaración de variable o una intrucción")
+    elif nerr == 7: #:
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ':'")
+    elif nerr == 8: #;
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ';'")
+    elif nerr == 9: #,
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ','")
     
   # No Terminal Programa
   def Programa(self):
@@ -100,8 +102,9 @@ class Sintactico:
     else:
       if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
         return True
-      self.Error(6, self.token)
-      return False
+      else:
+        self.Error(6, self.token)
+        return False
   
   #  No Terminal Decl_V
   def decl_v(self):
@@ -130,16 +133,21 @@ class Sintactico:
   def lista_id(self):
     if self.token.cat == "Identificador":
       self.Avanza()
-      if self.resto_listaid():
-        return True
-      else:
-        return False
+      return self.resto_listaid()
     else:
       self.Error(2, self.token)
       return False
 
   def resto_listaid(self):
-    pass
+    if self.token.cat == "Coma":
+      self.Avanza()
+      return self.lista_id()
+    else:
+      if self.token.cat == "DosPuntos":
+        return True
+      else:
+        self.Error(2, self.token)
+        return False
 
   def tipo(self):
     if self.tipo_std():
