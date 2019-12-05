@@ -109,13 +109,25 @@ class Sintactico:
       return False
   
   def lista_id(self):
-    return True
+    if self.token.cat == "Identificador":
+      self.Avanza()
+      if self.resto_listaid():
+        return True
+      else:
+        return False
+    else:
+      self.Error(2, self.token)
+      return False
+
+  def resto_listaid(self):
+    pass
 
   def tipo(self):
     return True
 
   def decl_v(self):
     return True
+
 
  
 
