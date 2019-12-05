@@ -23,16 +23,22 @@ class Sintactico:
 # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
     if nerr == 1: #PROGRAMA
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera PROGRAMA en la cabecera del programa")
-    elif nerr == 2: #Identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador")
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA en la cabecera del programa")
+    elif nerr == 2: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se espera un identificador")
     elif nerr == 3: #Falta punto y coma
       print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
     elif nerr == 4: #Programa debe acabar con .
       print ("Linea: " + str(self.token.linea) + "  ERROR: La definición del programa debe acabar con un .")
     elif nerr == 5: #Categorías despues del final de fichero
       print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
-
+    elif nerr == 6: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba una delaración de variable o una intrucción")
+    elif nerr == 7: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ':'")
+    elif nerr == 8: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ';'")
+    
     
     
  
@@ -73,10 +79,34 @@ class Sintactico:
       return False
       
   def decl_var(self):
-    #if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
-      # <decl_var> → VAR <lista_id> : <tipo> ; <decl_v>
-      #pass
-      return True
+    # <decl_var> -> VAR <lista_id> : <tipo> ; <decl_v>
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
+      self.Avanza()
+      if self.lista_id():
+        if self.token.cat == "DosPuntos":
+          self.Avanza()
+          if self.tipo():
+            if self.token.cat == "PuntoComa":
+              self.Avanza()
+              if self.decl_v():
+                return True
+              else:
+                return False
+            else:
+              self.Error(8, self.token)
+              return False
+          else:
+            return False
+        else:
+          self.Error(7, self.token)
+          return False
+      else:
+        return False
+    else:
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+        return True
+      self.Error(6, self.token)
+      return False
   
   def decl_v(self):
     if self.lista_id():
@@ -88,6 +118,15 @@ class Sintactico:
       
   
   def instrucciones(self):
+    return True
+    
+  def lista_id(self):
+    return True
+
+  def tipo(self):
+    return True
+
+  def decl_v(self):
     return True
 
  
