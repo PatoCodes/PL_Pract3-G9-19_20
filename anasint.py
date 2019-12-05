@@ -26,6 +26,12 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR Se espera PROGRAMA en la cabecera del programa")
     elif nerr == 2: #identificador
       print ("Linea: " + str(self.token.linea) + "  ERROR Se espera un identificador")
+    elif nerr == 6: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba una delaración de variable o una intrucción")
+    elif nerr == 7: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ':'")
+    elif nerr == 8: #identificador
+      print ("Linea: " + str(self.token.linea) + "  ERROR Se esperaba ';'")
  
 # TERMINALES
   def Programa(self):
@@ -37,9 +43,43 @@ class Sintactico:
   
 
   def decl_var(self):
+    # <decl_var> -> VAR <lista_id> : <tipo> ; <decl_v>
     if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
-      # <decl_var> → VAR <lista_id> : <tipo> ; <decl_v>
-      pass
+      self.Avanza()
+      if self.lista_id():
+        if self.token.cat == "DosPuntos":
+          self.Avanza()
+          if self.tipo():
+            if self.token.cat == "PuntoComa":
+              self.Avanza()
+              if self.decl_v():
+                return True
+              else:
+                return False
+            else:
+              self.Error(8, self.token)
+              return False
+          else:
+            return False
+        else:
+          self.Error(7, self.token)
+          return False
+      else:
+        return False
+    else:
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+        return True
+      self.Error(6, self.token)
+      return False
+  
+  def lista_id(self):
+    pass
+
+  def tipo(self):
+    pass
+
+  def decl_v(self):
+    pass
 
  
 
