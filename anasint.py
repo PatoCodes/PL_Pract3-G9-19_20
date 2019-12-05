@@ -43,7 +43,11 @@ class Sintactico:
     elif nerr == 11: #INICIO
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba INICIO")
     elif nerr == 12: #FIN
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN"
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN")
+    elif nerr == 17: #lista_instr
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o un identificador")
+    elif nerr == 18: #FIN
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN")
     
     
   # No Terminal Programa
@@ -139,7 +143,7 @@ class Sintactico:
   def instrucciones(self):
     #<instrucciones> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
-      if lista_inst():
+      if self.lista_inst():
         if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":            
           return True
         else:
@@ -151,6 +155,23 @@ class Sintactico:
       self.Error(11, self.token)
       return False
 
+  def lista_inst(self):
+    #<lista_inst> → <instrucción> ; <lista_inst>
+    if self.instruccion():
+      if self.token.cat == "PuntoComa":
+        self.Avanza()
+        return True
+      else:
+        self.Error(8, self.token)
+        return False
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+      return True
+    else:
+      self.Error(18, self.token)
+      return False
+  
+  def instruccion(self):
+    return True
 
   def lista_id(self):
     #<lista_id> → id <resto_listaid>	
@@ -166,12 +187,11 @@ class Sintactico:
     if self.token.cat == "Coma":
       self.Avanza()
       return self.lista_id()
+    elif self.token.cat == "DosPuntos":
+      return True
     else:
-      if self.token.cat == "DosPuntos":
-        return True
-      else:
-        self.Error(2, self.token)
-        return False
+      self.Error(17, self.token)
+      return False
 
   def tipo(self):
     return True
