@@ -73,14 +73,15 @@ class Sintactico:
       return False
       
   def decl_var(self):
-    if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
+    #if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
       # <decl_var> → VAR <lista_id> : <tipo> ; <decl_v>
-      pass
+      #pass
+      return True
   
 
   
   def instrucciones(self):
-    pass
+    return True
 
  
 

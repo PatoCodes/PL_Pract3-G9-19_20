@@ -41,7 +41,9 @@ class OpAsigna(Componente):
 
 # componente lexico. Final de fichero
 class EOF(Componente):
-  pass
+  def __init__(self,nl):
+    Componente.__init__(self)
+    self.linea=nl
 
 
 # componente lexico.  Operadores de suma

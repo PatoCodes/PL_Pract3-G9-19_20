@@ -238,7 +238,7 @@ class Analex:
     return self.Analiza()
   else:
     # el final de fichero
-    return componentes.EOF()
+    return componentes.EOF(self.nlinea)
 
   
 
