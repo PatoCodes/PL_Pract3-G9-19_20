@@ -127,11 +127,6 @@ class Sintactico:
     else:
       return False
 
-      
-  
-  def instrucciones(self):
-    return True
-
   def lista_id(self):
     if self.token.cat == "Identificador":
       self.Avanza()
@@ -147,10 +142,17 @@ class Sintactico:
     pass
 
   def tipo(self):
+    if self.tipo_std():
+      #<Tipo> → VECTOR [num] de <Tipo_std>
+      return True
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "VECTOR":
+
+    else:
+      
+
+  def instrucciones(self):
     return True
 
-  def decl_v(self):
-    return True
 
 
  
