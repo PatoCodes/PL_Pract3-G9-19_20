@@ -40,15 +40,26 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ';'")
     elif nerr == 9: #,
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ','")
+    elif nerr == 10: #Tipo
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo o un vector")
     elif nerr == 11: #INICIO
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba INICIO")
     elif nerr == 12: #FIN
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN")
+    elif nerr == 13: #Inicio corchete
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba '['")
+    elif nerr == 14: #Número para índice
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un numero como indice")
+    elif nerr == 15: #Cierre corchete
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ']'")
+    elif nerr == 16: #DE
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera la palabra DE para indicar el tipo de un vector")
     elif nerr == 17: #lista_instr
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o un identificador")
     elif nerr == 18: #FIN
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN")
-    
+    elif nerr == 19: #TIPO VALIDO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")    
     
   # No Terminal Programa
   def Programa(self):
@@ -194,11 +205,47 @@ class Sintactico:
       return False
 
   def tipo(self):
-    return True
+    if self.tipo_std():
+      #<Tipo> → <tipo_std> 	
+      return True
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "VECTOR":
+      #<Tipo> → VECTOR [num] DE <Tipo_std>
+      self.Avanza()
+      if self.token.cat == "CorcheteApertura":
+        self.Avanza()
+        if self.token.cat == "Numero":
+          self.Avanza()
+          if self.token.cat == "]":
+            self.Avanza()
+            if self.token.cat == "PalabraReservada" and self.token.palabra == "DE":
+              self.Avanza()
+              return self.tipo_std()
+            else:
+              self.Error(16, self.token)
+              return False
+          else:
+            self.Error(15, self.token)
+            return False
+        else:
+          self.Error(14, self.token)
+          return False
+      else:
+        self.Error(13, self.token)
+        return False
+    else:
+      self.Error(10, self.token)
+      return False
 
-
-
- 
+  def tipo_std(self):
+    if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO","REAL","BOOLEANO"]:
+      #<Tipo_std> → ENTERO
+      #<Tipo_std> → REAL
+      #<Tipo_std> → BOOLEANO
+      self.Avanza()
+      return True
+    else:
+      self.Error(19, self.token)
+      return False
 
 ########################################################
 ##
