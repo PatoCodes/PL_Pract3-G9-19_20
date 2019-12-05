@@ -78,7 +78,14 @@ class Sintactico:
       #pass
       return True
   
-
+  def decl_v(self):
+    if self.lista_id():
+      #<decl_v> → <lista_id> : <tipo> ; <decl_v>
+    elif self.token.cat in ["INICIO"]:
+      #Siguientes
+      return True
+    else:
+      
   
   def instrucciones(self):
     return True
