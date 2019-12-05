@@ -30,10 +30,9 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
     elif nerr == 4: #Programa debe acabar con .
       print ("Linea: " + str(self.token.linea) + "  ERROR: La definición del programa debe acabar con un .")
-    elif nerr == 5: #Se deben declarar variables
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración de variables tras la cabecera.")
-    elif nerr == 6: #Se deben declarar instrucciones
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración de instrucciones tras la cabecera.")
+    elif nerr == 5: #Categorías despues del final de fichero
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
+
     
     
  
@@ -47,20 +46,21 @@ class Sintactico:
         if self.token.cat == "PuntoComa":
           self.Avanza()
           if self.decl_var():
-            self.Avanza()
             if self.instrucciones():
-              self.Avanza()
               if self.token.cat == "Punto":
-                #Analizado con exito
-                return True
+                #FINAL DE FICHERO
+                self.Avanza()
+                if self.token.cat == "EOF":
+                  return True
+                else:
+                  self.Error(5, self.token)
+                  return False
               else:
                 self.Error(4, self.token)
                 return False
             else:
-              self.Error(6, self.token)
               return False
           else:
-            self.Error(5, self.token)
             return False
         else:
           self.Error(3, self.token)
@@ -72,12 +72,15 @@ class Sintactico:
       self.Error(1, self.token) 
       return False
       
-  
-
   def decl_var(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
       # <decl_var> → VAR <lista_id> : <tipo> ; <decl_v>
       pass
+  
+
+  
+  def instrucciones(self):
+    pass
 
  
 
