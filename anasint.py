@@ -128,23 +128,24 @@ class Sintactico:
   
   #  No Terminal Decl_V
   def decl_v(self):
-    if self.lista_id():
+    if self.token.cat == "Identificador":
       #<decl_v> → <lista_id> : <tipo> ; <decl_v>
-      if self.token.cat == "DosPuntos":
-        self.Avanza()
-        if self.tipo():
-          if self.token.cat == "PuntoComa":
-            self.Avanza()
-            return self.decl_v()
+      if self.lista_id():
+        if self.token.cat == "DosPuntos":
+          self.Avanza()
+          if self.tipo():
+            if self.token.cat == "PuntoComa":
+              self.Avanza()
+              return self.decl_v()
+            else:
+              self.Error(8, self.token)
+              return False
           else:
-            self.Error(8, self.token)
             return False
         else:
+          self.Error(7, self.token)
           return False
-      else:
-        self.Error(7, self.token)
-        return False
-    elif self.token.cat in ["INICIO"]:
+    elif self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO"]:
       #Siguientes
       return True
     else:
@@ -169,15 +170,14 @@ class Sintactico:
 
   def lista_inst(self):
     #<lista_inst> → <instrucción> ; <lista_inst>
-    print(self.token.cat)
-    print(self.token.palabra)
-    if self.instruccion():
-      if self.token.cat == "PuntoComa":
-        self.Avanza()
-        return True
-      else:
-        self.Error(8, self.token)
-        return False
+    if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
+      if self.instruccion():
+        if self.token.cat == "PuntoComa":
+          self.Avanza()
+          return True
+        else:
+          self.Error(8, self.token)
+          return False
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
       return True
     else:
@@ -188,7 +188,7 @@ class Sintactico:
     return False
 
   def lista_id(self):
-    #<lista_id> → id <resto_listaid>	
+    #<lista_id> → id <resto_listaid>
     if self.token.cat == "Identificador":
       self.Avanza()
       return self.resto_listaid()
@@ -197,10 +197,11 @@ class Sintactico:
       return False
 
   def resto_listaid(self):
-    #<resto_listaid> →  , <lista_id>	
+    #<resto_listaid> →  , <lista_id>
     if self.token.cat == "Coma":
       self.Avanza()
       return self.lista_id()
+    #Siguientes
     elif self.token.cat == "DosPuntos":
       return True
     else:
