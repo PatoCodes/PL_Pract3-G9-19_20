@@ -33,7 +33,7 @@ class Sintactico:
     elif nerr == 5: #Categorías despues del final de fichero
       print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
     elif nerr == 6: #decl_var
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una intrucción")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una instrucción")
     elif nerr == 7: #:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':'")
     elif nerr == 8: #;
@@ -150,12 +150,13 @@ class Sintactico:
     else:
       return False
 
-      
   def instrucciones(self):
     #<instrucciones> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+      self.Avanza()
       if self.lista_inst():
-        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":            
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+          self.Avanza()            
           return True
         else:
           self.Error(12, self.token)
@@ -168,6 +169,8 @@ class Sintactico:
 
   def lista_inst(self):
     #<lista_inst> → <instrucción> ; <lista_inst>
+    print(self.token.cat)
+    print(self.token.palabra)
     if self.instruccion():
       if self.token.cat == "PuntoComa":
         self.Avanza()
@@ -182,7 +185,7 @@ class Sintactico:
       return False
   
   def instruccion(self):
-    return True
+    return False
 
   def lista_id(self):
     #<lista_id> → id <resto_listaid>	
