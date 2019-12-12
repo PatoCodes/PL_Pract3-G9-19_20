@@ -68,10 +68,10 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración válida de variable")
     elif nerr == 23: #SINO
       print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 24: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 25: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 24: #Expresión
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una expresión")
+    elif nerr == 25: #Instrucción
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una instrucción")
     elif nerr == 26: #SINO
       print ("Linea: " + str(self.token.linea) + "  ERROR: ")
     elif nerr == 27: #SINO
@@ -373,7 +373,7 @@ class Sintactico:
       # SIGUIENTES
       return True
     else:
-      
+      pass
 
 
   def inst_es(self):
@@ -387,7 +387,7 @@ class Sintactico:
       else:
         return False
     else:
-      self.Error(X, self.token)
+      self.Error(24, self.token)
       return
 
   def expresionPrime(self):
