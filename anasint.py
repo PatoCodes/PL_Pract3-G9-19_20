@@ -67,7 +67,7 @@ class Sintactico:
     elif nerr == 22: #Se esperaba una declaración válida de variable
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración válida de variable")
     elif nerr == 23: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Acceso inconsistente a variable")
     elif nerr == 24: #SINO
       print ("Linea: " + str(self.token.linea) + "  ERROR: ")
     elif nerr == 25: #SINO
@@ -362,12 +362,21 @@ class Sintactico:
     if self.token.cat == "CorcheteApertura":
       # <resto_var> -> [<expr_simple>]
       self.Avanza()
+      if self.expr_simple():
+        if self.token.cat == "CorcheteCierre":
+          self.Avanza()
+          return True
+        else:
+          self.Error(15, self.token)
+          return False
+      else:
+        return False
     elif self.token.cat in ["OpMultiplicacion","OpSuma","CorcheteCierre","ParentesisCierre", "OpRelacional", "PuntoComa"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["Y","O","HACER","SINO","ENTONCES"]):
       # SIGUIENTES
       return True
     else:
-      
-
+      self.Error(23, self.token)
+      return False
 
   def inst_es(self):
     return True
