@@ -328,8 +328,26 @@ class Sintactico:
 
   def expresion(self):
     return True
+
+  def expresionPrime(self):
+    return True
     
   def expr_simple(self):
+    return True
+  
+  def restoexpr_simple(self):
+    return True
+
+  def termino(self):
+    return True
+  
+  def resto_term(self):
+    return True
+
+  def factor(self):
+    return True
+
+  def signo(self):
     return True
 
 
