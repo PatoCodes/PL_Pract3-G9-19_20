@@ -68,10 +68,10 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración válida de variable")
     elif nerr == 23: #SINO
       print ("Linea: " + str(self.token.linea) + "  ERROR: Acceso inconsistente a variable")
-    elif nerr == 24: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 25: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 24: #Expresión
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una expresión")
+    elif nerr == 25: #Instrucción
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una instrucción")
     elif nerr == 26: #SINO
       print ("Linea: " + str(self.token.linea) + "  ERROR: ")
     elif nerr == 27: #SINO
@@ -280,6 +280,7 @@ class Sintactico:
       return False
   
   def instruccion(self):
+    # <instrucción> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
       self.Avanza()
       if self.lista_inst():
@@ -288,10 +289,13 @@ class Sintactico:
           return True
       else:
         return False
+    # <instrucción> → <inst_simple>	
     elif self.token.cat == "Identificador":
       return self.inst_simple()
+    # <instrucción> → <inst_es>	
     elif self.token.cat == "PalabraReservada" and self.token.palabra in ["LEE", "ESCRIBE"]:
       return self.inst_es()
+    # <instrucción> →  SI <expresion> ENTONCES <instrucción> SINO <instrucción>
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "SI":
       self.Avanza()
       if self.expresion():
@@ -310,6 +314,9 @@ class Sintactico:
           return False
       else:
         return False
+    else:
+      self.Error(X, self.token)
+      return False
 
   def inst_simple(self):
     if self.token.cat == "Identificador":
@@ -382,13 +389,14 @@ class Sintactico:
     return True
 
   def expresion(self):
+    # <expresión> → <expr_simple> <expresiónPrime> 
     if self.token.cat in ["Identificador", "Numero", "OpSuma", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
       if self.expr_simple():
         return self.expresionPrime()
       else:
         return False
     else:
-      self.Error(X, self.token)
+      self.Error(24, self.token)
       return
 
   def expresionPrime(self):
