@@ -37,9 +37,9 @@ class Sintactico:
     elif nerr == 7: #:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':' para declaración de tipo")
     elif nerr == 8: #
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ") #ERROR LIBRE
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':=', una expresion entre corchetes, un SINO o un ';'") #ERROR LIBRE
     elif nerr == 9: #,
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ','")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ") #ERROR LIBRE
     elif nerr == 10: #Tipo
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo válido (ENTERO, REAL, BOOLEANO) o un vector")
     elif nerr == 11: #INICIO
@@ -59,11 +59,12 @@ class Sintactico:
     elif nerr == 18: #ENTONCES
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'ENTONCES'")
     elif nerr == 19: #TIPO VALIDO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")  
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")    
+    elif nerr == 20:
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de asignación ':='")    
     elif nerr == 21: #SINO
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'SINO'")
 
-    
   # No Terminal Programa
   def Programa(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
@@ -286,6 +287,53 @@ class Sintactico:
           return False
       else:
         return False
+
+  def inst_simple(self):
+    if self.token.cat == "Identificador":
+      #<inst_simple> -> id <resto_instsimple>
+      self.Avanza()
+      return self.resto_instsimple()
+    else:
+      self.Error(2, self.token)
+      return False
+
+  def resto_instsimple(self):
+    if self.token.cat == "OpAsigna":
+      # <resto_instsimple> -> opasigna <expresion>
+      self.Avanza()
+      return self.expresion()
+    elif self.token.cat == "CorcheteApertura":
+      # <resto_instsimple> -> [<expr_simple>] opasigna <expresion>
+      self.Avanza()
+      if self.expr_simple():
+        if self.token.cat == "CorcheteCierre":
+          self.Avanza()
+          if self.token.cat == "OpAsigna":
+            self.Avanza()
+            return self.expresion()
+          else:
+            self.Error(20, self.token)
+            return False
+        else:
+          self.Error(15, self.token)
+          return False
+      else:
+        return False
+    elif self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+      # Siguientes
+      return True
+    else:
+      self.Error(8, self.token)
+      return False
+
+  def expresion(self):
+    return True
+    
+  def expr_simple(self):
+    return True
+
+
+    
 
 ########################################################
 ##
