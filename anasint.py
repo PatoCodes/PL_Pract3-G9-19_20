@@ -35,9 +35,9 @@ class Sintactico:
     elif nerr == 6: #decl_var
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una instrucción")
     elif nerr == 7: #:
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':'")
-    elif nerr == 8: #;
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ';'")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':' para declaración de tipo")
+    elif nerr == 8: #
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ") #ERROR LIBRE
     elif nerr == 9: #,
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ','")
     elif nerr == 10: #Tipo
@@ -57,7 +57,7 @@ class Sintactico:
     elif nerr == 17: #lista_instr
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o un identificador")
     elif nerr == 18: #FIN
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ") #ERROR LIBRE
     elif nerr == 19: #TIPO VALIDO
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")    
     
@@ -110,7 +110,7 @@ class Sintactico:
               self.Avanza()
               return self.decl_v()
             else:
-              self.Error(8, self.token)
+              self.Error(3, self.token)
               return False
           else:
             return False
@@ -138,7 +138,7 @@ class Sintactico:
               self.Avanza()
               return self.decl_v()
             else:
-              self.Error(8, self.token)
+              self.Error(3, self.token)
               return False
           else:
             return False
@@ -176,12 +176,12 @@ class Sintactico:
           self.Avanza()
           return True
         else:
-          self.Error(8, self.token)
+          self.Error(3, self.token)
           return False
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
       return True
     else:
-      self.Error(18, self.token)
+      self.Error(12, self.token)
       return False
   
   def instruccion(self):
