@@ -327,7 +327,14 @@ class Sintactico:
       return False
 
   def expresion(self):
-    return True
+    if self.token.cat in ["Identificador", "Numero", "OpSuma", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
+      if self.expr_simple():
+        return self.expresionPrime()
+      else:
+        return False
+    else:
+      self.Error(X, self.token)
+      return
 
   def expresionPrime(self):
     return True
