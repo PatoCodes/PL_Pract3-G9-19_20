@@ -152,42 +152,6 @@ class Sintactico:
       self.Error(2, self.token)
       return False
 
-  def instrucciones(self):
-    #<instrucciones> → INICIO <lista_inst> FIN
-    if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
-      self.Avanza()
-      if self.lista_inst():
-        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
-          self.Avanza()            
-          return True
-        else:
-          self.Error(12, self.token)
-          return False
-      else:
-        return False
-    else:
-      self.Error(11, self.token)
-      return False
-
-  def lista_inst(self):
-    #<lista_inst> → <instrucción> ; <lista_inst>
-    if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
-      if self.instruccion():
-        if self.token.cat == "PuntoComa":
-          self.Avanza()
-          return True
-        else:
-          self.Error(3, self.token)
-          return False
-    elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
-      return True
-    else:
-      self.Error(12, self.token)
-      return False
-  
-  def instruccion(self):
-    return True
-
   def lista_id(self):
     #<lista_id> → id <resto_listaid>
     if self.token.cat == "Identificador":
@@ -253,9 +217,45 @@ class Sintactico:
       self.Error(19, self.token)
       return False
 
+  def instrucciones(self):
+    #<instrucciones> → INICIO <lista_inst> FIN
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+      self.Avanza()
+      if self.lista_inst():
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+          self.Avanza()            
+          return True
+        else:
+          self.Error(12, self.token)
+          return False
+      else:
+        return False
+    else:
+      self.Error(11, self.token)
+      return False
+
+  def lista_inst(self):
+    #<lista_inst> → <instrucción> ; <lista_inst>
+    if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
+      if self.instruccion():
+        if self.token.cat == "PuntoComa":
+          self.Avanza()
+          return True
+        else:
+          self.Error(3, self.token)
+          return False
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+      return True
+    else:
+      self.Error(12, self.token)
+      return False
+  
+  def instruccion(self):
+    return True
+
 ########################################################
 ##
-## PRograma principal que lanza el analizador sintactico
+## Programa principal que lanza el analizador sintactico
 ####################################################
 if __name__=="__main__":
   script, filename=argv
