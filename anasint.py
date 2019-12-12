@@ -41,7 +41,7 @@ class Sintactico:
     elif nerr == 9: #,
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ','")
     elif nerr == 10: #Tipo
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo o un vector")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo válido (ENTERO, REAL, BOOLEANO) o un vector")
     elif nerr == 11: #INICIO
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba INICIO")
     elif nerr == 12: #FIN
@@ -55,7 +55,7 @@ class Sintactico:
     elif nerr == 16: #DE
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera la palabra DE para indicar el tipo de un vector")
     elif nerr == 17: #lista_instr
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o un identificador")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o ':'")
     elif nerr == 18: #FIN
       print ("Linea: " + str(self.token.linea) + "  ERROR: ") #ERROR LIBRE
     elif nerr == 19: #TIPO VALIDO
@@ -149,6 +149,7 @@ class Sintactico:
       #Siguientes
       return True
     else:
+      self.Error(2, self.token)
       return False
 
   def instrucciones(self):
@@ -185,7 +186,7 @@ class Sintactico:
       return False
   
   def instruccion(self):
-    return False
+    return True
 
   def lista_id(self):
     #<lista_id> → id <resto_listaid>
@@ -209,9 +210,10 @@ class Sintactico:
       return False
 
   def tipo(self):
-    if self.tipo_std():
-      #<Tipo> → <tipo_std> 	
-      return True
+    if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
+      #<Tipo> → <tipo_std>
+      if self.tipo_std(): 	
+        return True
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "VECTOR":
       #<Tipo> → VECTOR [num] DE <Tipo_std>
       self.Avanza()
@@ -219,7 +221,7 @@ class Sintactico:
         self.Avanza()
         if self.token.cat == "Numero":
           self.Avanza()
-          if self.token.cat == "]":
+          if self.token.cat == "CorcheteCierre":
             self.Avanza()
             if self.token.cat == "PalabraReservada" and self.token.palabra == "DE":
               self.Avanza()
