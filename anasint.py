@@ -56,10 +56,13 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera la palabra DE para indicar el tipo de un vector")
     elif nerr == 17: #lista_instr
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o ':'")
-    elif nerr == 18: #FIN
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ") #ERROR LIBRE
+    elif nerr == 18: #ENTONCES
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'ENTONCES'")
     elif nerr == 19: #TIPO VALIDO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")    
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")  
+    elif nerr == 21: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'SINO'")
+
     
   # No Terminal Programa
   def Programa(self):
@@ -244,6 +247,8 @@ class Sintactico:
         else:
           self.Error(3, self.token)
           return False
+      else:
+        return False
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
       return True
     else:
@@ -251,7 +256,36 @@ class Sintactico:
       return False
   
   def instruccion(self):
-    return True
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+      self.Avanza()
+      if self.lista_inst():
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+          self.Avanza()
+          return True
+      else:
+        return False
+    elif self.token.cat == "Identificador":
+      return self.inst_simple()
+    elif self.token.cat == "PalabraReservada" and self.token.palabra in ["LEE", "ESCRIBE"]:
+      return self.inst_es()
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "SI":
+      self.Avanza()
+      if self.expresion():
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "ENTONCES":
+          self.Avanza()
+          if self.instruccion():
+            if self.token.cat == "PalabraReservada" and self.token.palabra == "SINO":
+              return self.instruccion()
+            else:
+              self.Error(21, self.token)
+              return False
+          else:
+            return False
+        else:
+          self.Error(18, self.token)
+          return False
+      else:
+        return False
 
 ########################################################
 ##
