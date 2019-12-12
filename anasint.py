@@ -64,6 +64,29 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de asignación ':='")    
     elif nerr == 21: #SINO
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'SINO'")
+    elif nerr == 22: #Se esperaba una declaración válida de variable
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración válida de variable")
+    elif nerr == 23: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 24: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 25: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 26: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 27: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 28: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 29: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 30: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 31: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 32: #SINO
+      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+
 
   # No Terminal Programa
   def Programa(self):
@@ -332,6 +355,29 @@ class Sintactico:
     else:
       self.Error(8, self.token)
       return False
+
+  def variable(self):
+    if self.token.cat == "Identificador":
+      # <variable> -> id <resto_var>
+      self.Avanza()
+      return self.resto_var()
+    else:
+      self.Error(22, self.token)
+      return False
+
+  def resto_var(self):
+    if self.token.cat == "CorcheteApertura":
+      # <resto_var> -> [<expr_simple>]
+      self.Avanza()
+    elif self.token.cat in ["OpMultiplicacion","OpSuma","CorcheteCierre","ParentesisCierre", "OpRelacional", "PuntoComa"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["Y","O","HACER","SINO","ENTONCES"]):
+      # SIGUIENTES
+      return True
+    else:
+      
+
+
+  def inst_es(self):
+    return True
 
   def expresion(self):
     # <expresión> → <expr_simple> <expresiónPrime> 
