@@ -87,8 +87,9 @@ class Sintactico:
     elif nerr == 32: #factor
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un operador un '(', un 'NO', un 'CIERTO', un 'FALSO', un 'HACER', un 'SINO' o un 'ENTONCES'")
     elif nerr == 33: #OpSuma
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un símbolo '+' o un '-')
-
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un símbolo '+' o un '-'")
+    elif nerr == 34: #HACER
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba 'HACER'")
 
 
   # No Terminal Programa
@@ -265,17 +266,18 @@ class Sintactico:
       return False
 
   def lista_inst(self):
-    #<lista_inst> → <instrucción> ; <lista_inst>
+    # <lista_inst> → <instrucción> ; <lista_inst>
     if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
       if self.instruccion():
         if self.token.cat == "PuntoComa":
           self.Avanza()
-          return True
+          return self.lista_inst()
         else:
           self.Error(3, self.token)
           return False
       else:
         return False
+    # Siguientes
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
       return True
     else:
@@ -317,9 +319,22 @@ class Sintactico:
           return False
       else:
         return False
+    # <instrucción> →  MIENTRAS <expresión> HACER <instrucción>	
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "MIENTRAS":
+      self.Avanza()
+      if self.expresion():
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "HACER":
+          self.Avanza()
+          return self.instruccion()
+        else:
+          self.Error(34, self.token)
+          return False
+      else:
+        return False
     else:
       self.Error(25, self.token)
       return False
+    
 
   def inst_simple(self):
     if self.token.cat == "Identificador":
@@ -414,10 +429,11 @@ class Sintactico:
       if self.token.cat == "ParentesisApertura":
         self.Avanza()
         if self.expr_simple():
-          if self.token.cat == "ParentesisApertura":
+          if self.token.cat == "ParentesisCierre":
             self.Avanza()
             return True
           else:
+            print(self.token.cat)
             self.Error(27, self.token)
             return False
         else:
@@ -533,9 +549,9 @@ class Sintactico:
     elif self.token.cat == "Numero":
       self.Avanza()
       return True
-    #	<factor> → ( <expresión> )
+    # <factor> → ( <expresión> )
     elif self.token.cat == "ParentesisApertura":
-      self.Avanza
+      self.Avanza()
       if self.expresion():
         if self.token.cat == "ParentesisCierre":
           self.Avanza()
