@@ -35,24 +35,32 @@ class Analex:
  #
  ############################################################################
  def TrataNum(self,flujo, ch):
+  # Almacenamos el primer número y preparamos para seguir leyendo
   l=ch
   real = False
   ch = self.flujo.siguiente()
+  # Mientras leamos números, seguimos avanzando
   while ch and ch in string.digits:
    l += ch
    ch = self.flujo.siguiente()
+  # Comprobamos si el siguiente caracter leido despues de los números es un punto
   if ch and ch == ".":
+   # Punto encontrado: esperamos número real
    l += ch
    real = True
    ch = self.flujo.siguiente()
+   # Esperamos encontrar al menos un decimal
    if ch and ch in string.digits:
+    # Mientras leamos dígitos, seguimos en el bucle
     while ch and ch in string.digits:
      l += ch
      ch = self.flujo.siguiente()
     if ch:
      self.flujo.devuelve(ch)
    else:
+     # Si no hay decimales, ha habido un error leyendo el numero real
      raise errores.ErrorLexico("Numero real erroneo")
+  # Punto no encontrado: hemos leido un entero
   elif ch:
    self.flujo.devuelve(ch)
   if real:

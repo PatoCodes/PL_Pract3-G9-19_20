@@ -1,7 +1,7 @@
 PROGRAMA p1; //COMENTARIO DE PRUEBA
 VAR i,x:ENTERO;
 INICIO
-	i:=0.0;
+	i:=0.00;
 	MIENTRAS (i<>5) HACER
 		INICIO
 			x:=i/4;
@@ -11,7 +11,7 @@ INICIO
 	ENTONCES 
 		INICIO
 			LEE(x);
-			id[2]:=69.69;
+			id[2] := 6.999;
 		FIN
 	SINO
 		a:=3*2;
