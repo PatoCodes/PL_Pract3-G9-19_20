@@ -292,6 +292,8 @@ class Sintactico:
         if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
           self.Avanza()
           return True
+        else:
+          self.Error(12, self.token)
       else:
         return False
     # <instrucción> → <inst_simple>	
@@ -308,6 +310,7 @@ class Sintactico:
           self.Avanza()
           if self.instruccion():
             if self.token.cat == "PalabraReservada" and self.token.palabra == "SINO":
+              self.Avanza()
               return self.instruccion()
             else:
               self.Error(21, self.token)
@@ -411,7 +414,7 @@ class Sintactico:
         self.Avanza()
         if self.token.cat == "Identificador":
           self.Avanza()
-          if self.token.cat == "ParentesisApertura":
+          if self.token.cat == "ParentesisCierre":
             self.Avanza()
             return True
           else:
@@ -432,8 +435,7 @@ class Sintactico:
           if self.token.cat == "ParentesisCierre":
             self.Avanza()
             return True
-          else:
-            print(self.token.cat)
+          else:     
             self.Error(27, self.token)
             return False
         else:
