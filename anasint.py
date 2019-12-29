@@ -66,8 +66,8 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'SINO'")
     elif nerr == 22: #Se esperaba una declaración válida de variable
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración válida de variable")
-    elif nerr == 23: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Acceso inconsistente a variable")
+    elif nerr == 23: #Acceso erroneo a variable
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Acceso erroneo a la variable")
     elif nerr == 24: #Expresión
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una expresión")
     elif nerr == 25: #Instrucción
@@ -83,7 +83,7 @@ class Sintactico:
     elif nerr == 30: #resto_exprsimple
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'")
     elif nerr == 31: #resto_term
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de suma, multiplicación o relacional, un ')', un ';',un 'HACER', un 'SINO' o un 'ENTONCES'")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de suma, multiplicación o relacional; un ')', un ';',un 'HACER', un 'SINO' o un 'ENTONCES'")
     elif nerr == 32: #factor
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un operador un '(', un 'NO', un 'CIERTO', un 'FALSO', un 'HACER', un 'SINO' o un 'ENTONCES'")
     elif nerr == 33: #OpSuma
@@ -157,7 +157,7 @@ class Sintactico:
         self.Error(6, self.token)
         return False
   
-  #  No Terminal Decl_V
+  # No Terminal Decl_V
   def decl_v(self):
     if self.token.cat == "Identificador":
       #<decl_v> → <lista_id> : <tipo> ; <decl_v>
@@ -183,6 +183,7 @@ class Sintactico:
       self.Error(2, self.token)
       return False
 
+  # No Terminal Lista_Id
   def lista_id(self):
     #<lista_id> → id <resto_listaid>
     if self.token.cat == "Identificador":
@@ -192,6 +193,7 @@ class Sintactico:
       self.Error(2, self.token)
       return False
 
+  # No Terminal Resto_Listaid
   def resto_listaid(self):
     #<resto_listaid> →  , <lista_id>
     if self.token.cat == "Coma":
@@ -204,6 +206,7 @@ class Sintactico:
       self.Error(17, self.token)
       return False
 
+  # No Terminal Tipo
   def tipo(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
       #<Tipo> → <tipo_std>
@@ -237,6 +240,7 @@ class Sintactico:
       self.Error(10, self.token)
       return False
 
+  # No Terminal Tipo_Std
   def tipo_std(self):
     if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO","REAL","BOOLEANO"]:
       #<Tipo_std> → ENTERO
@@ -248,6 +252,7 @@ class Sintactico:
       self.Error(19, self.token)
       return False
 
+  # No Terminal Instrucciones
   def instrucciones(self):
     #<instrucciones> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
@@ -265,6 +270,7 @@ class Sintactico:
       self.Error(11, self.token)
       return False
 
+  # No Terminal Lista_Inst
   def lista_inst(self):
     # <lista_inst> → <instrucción> ; <lista_inst>
     if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
@@ -284,6 +290,7 @@ class Sintactico:
       self.Error(12, self.token)
       return False
   
+  # No Terminal Instruccion
   def instruccion(self):
     # <instrucción> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
@@ -338,7 +345,7 @@ class Sintactico:
       self.Error(25, self.token)
       return False
     
-
+  # No Terminal Inst_Simple
   def inst_simple(self):
     if self.token.cat == "Identificador":
       #<inst_simple> -> id <resto_instsimple>
@@ -348,6 +355,7 @@ class Sintactico:
       self.Error(2, self.token)
       return False
 
+  # No Terminal Resto_Instsimple
   def resto_instsimple(self):
     if self.token.cat == "OpAsigna":
       # <resto_instsimple> -> opasigna <expresion>
@@ -377,6 +385,7 @@ class Sintactico:
       self.Error(8, self.token)
       return False
 
+  # No Terminal Variable
   def variable(self):
     if self.token.cat == "Identificador":
       # <variable> -> id <resto_var>
@@ -386,6 +395,7 @@ class Sintactico:
       self.Error(22, self.token)
       return False
 
+  # No Terminal Resto_Var
   def resto_var(self):
     if self.token.cat == "CorcheteApertura":
       # <resto_var> -> [<expr_simple>]
@@ -403,9 +413,11 @@ class Sintactico:
       # SIGUIENTES
       return True
     else:
+      print(self.token)
       self.Error(23, self.token)
       return False
 
+  # No Terminal Inst_Es
   def inst_es(self):
     # <inst_es> → LEE(id)
     if self.token.cat == "PalabraReservada" and self.token.palabra == "LEE":
@@ -448,6 +460,7 @@ class Sintactico:
       self.Error(9, self.token)  
       return False
 
+  # No Terminal Expresion
   def expresion(self):
     # <expresión> → <expr_simple> <expresiónPrime> 
     if self.token.cat in ["Identificador", "Numero", "OpSuma", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
@@ -459,8 +472,9 @@ class Sintactico:
       self.Error(24, self.token)
       return
 
+  # No Terminal ExpresionPrime
   def expresionPrime(self):
-    # <expresiónPrime> → oprel <expr_simple>	
+    # <expresiónPrime> → oprel <expr_simple>
     if self.token.cat == "OpRelacional":
       self.Avanza()
       return self.expr_simple()
@@ -471,7 +485,7 @@ class Sintactico:
       self.Error(28, self.token)
       return False
     
-    
+  # No Terminal Expr_Simple
   def expr_simple(self):
     # <expr_simple> → <término> <resto_exsimple>
     if self.token.cat in ["Identificador", "Numero", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
@@ -492,6 +506,7 @@ class Sintactico:
       self.Error(29, self.token)
       return False
   
+  # No Terminal Restoexpr_Simple
   def restoexpr_simple(self):
     # <resto_exsimple> → opsuma <término> <resto_exsimple>
     if self.token.cat == "OpSuma":
@@ -513,14 +528,16 @@ class Sintactico:
       self.Error(30, self.token)
       return False
 
-
+  # No Terminal Termino
   def termino(self):
-    # <término> → <factor> <resto_term>	
-    if self.factor():
-      return self.resto_term()
-    else:
-      return False
+    # <término> → <factor> <resto_term>
+    if self.token.cat in ["Identificador", "Numero", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
+      if self.factor():
+        return self.resto_term()
+      else:
+        return False
   
+  # No Terminal Resto_Term
   def resto_term(self):
     # <resto_term> → opmult <factor> <resto_term>
     if self.token.cat == "OpMultiplicacion":
@@ -542,7 +559,7 @@ class Sintactico:
       self.Error(31, self.token)
       return False
 
-
+  # No Terminal Factor
   def factor(self):
     #	<factor> → <variable>
     if self.token.cat == "Identificador":
@@ -572,14 +589,14 @@ class Sintactico:
       self.Avanza()
       return True
     # <factor> → FALSO
-    elif self.token.cat == "PalabraReservada" and self.token.palabra == "FALSE":
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "FALSO":
       self.Avanza()
       return True
     else:
       self.Error(32, self.token)
       return False
 
-
+  # No Terminal Signo
   def signo(self):
     # <signo> → +
     # <signo> → -
@@ -591,12 +608,11 @@ class Sintactico:
       return False
 
 
-    
-
 ########################################################
-##
-## Programa principal que lanza el analizador sintactico
-####################################################
+#
+# Programa principal que lanza el analizador sintactico
+#
+########################################################
 if __name__=="__main__":
   script, filename=argv
   txt=open(filename)
