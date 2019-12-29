@@ -23,9 +23,9 @@ class Sintactico:
 # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
     if nerr == 1: #PROGRAMA
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera PROGRAMA en la cabecera del programa")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba PROGRAMA en la cabecera del programa")
     elif nerr == 2: #identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera un identificador")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador")
     elif nerr == 3: #Falta punto y coma
       print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
     elif nerr == 4: #Programa debe acabar con .
@@ -37,9 +37,9 @@ class Sintactico:
     elif nerr == 7: #:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':' para declaración de tipo")
     elif nerr == 8: #
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':=', una expresion entre corchetes, un SINO o un ';'") #ERROR LIBRE
-    elif nerr == 9: #,
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ") #ERROR LIBRE
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':=', una expresion entre corchetes, un SINO o un ';'")
+    elif nerr == 9: #inst_es
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'LEE' o un 'ESCRIBE'")
     elif nerr == 10: #Tipo
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo válido (ENTERO, REAL, BOOLEANO) o un vector")
     elif nerr == 11: #INICIO
@@ -53,7 +53,7 @@ class Sintactico:
     elif nerr == 15: #Cierre corchete
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ']'")
     elif nerr == 16: #DE
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se espera la palabra DE para indicar el tipo de un vector")
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba la palabra DE para indicar el tipo de un vector")
     elif nerr == 17: #lista_instr
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o ':'")
     elif nerr == 18: #ENTONCES
@@ -72,20 +72,23 @@ class Sintactico:
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una expresión")
     elif nerr == 25: #Instrucción
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una instrucción")
-    elif nerr == 26: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 27: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 28: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 29: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 30: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 31: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
-    elif nerr == 32: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: ")
+    elif nerr == 26: #Paréntesis apertura
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un '('")
+    elif nerr == 27: #Paréntesis cierre
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un ')'")
+    elif nerr == 28: #Expr_prime
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador relacional, un ')', un ';', un 'HACER', un 'SINO' o un 'ENTONCES'")
+    elif nerr == 29: #Expr_simple
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un signo '+' o un '-' un '(', un 'NO', un 'CIERTO', o un 'FALSO'")
+    elif nerr == 30: #resto_exprsimple
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'")
+    elif nerr == 31: #resto_term
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de suma, multiplicación o relacional, un ')', un ';',un 'HACER', un 'SINO' o un 'ENTONCES'")
+    elif nerr == 32: #factor
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un operador un '(', un 'NO', un 'CIERTO', un 'FALSO', un 'HACER', un 'SINO' o un 'ENTONCES'")
+    elif nerr == 33: #OpSuma
+      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un símbolo '+' o un '-')
+
 
 
   # No Terminal Programa
@@ -315,7 +318,7 @@ class Sintactico:
       else:
         return False
     else:
-      self.Error(X, self.token)
+      self.Error(25, self.token)
       return False
 
   def inst_simple(self):
@@ -386,7 +389,46 @@ class Sintactico:
       return False
 
   def inst_es(self):
-    return True
+    # <inst_es> → LEE(id)
+    if self.token.cat == "PalabraReservada" and self.token.palabra == "LEE":
+      self.Avanza()
+      if self.token.cat == "ParentesisApertura":
+        self.Avanza()
+        if self.token.cat == "Identificador":
+          self.Avanza()
+          if self.token.cat == "ParentesisApertura":
+            self.Avanza()
+            return True
+          else:
+            self.Error(27, self.token)
+            return False
+        else:
+          self.Error(2, self.token)
+          return False
+      else:
+        self.Error(26, self.token)
+        return False
+    # <inst_es> → ESCRIBE ( <expr_simple>)	
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "ESCRIBE":
+      self.Avanza()
+      if self.token.cat == "ParentesisApertura":
+        self.Avanza()
+        if self.expr_simple():
+          if self.token.cat == "ParentesisApertura":
+            self.Avanza()
+            return True
+          else:
+            self.Error(27, self.token)
+            return False
+        else:
+          self.Error(2, self.token)
+          return False
+      else:
+        self.Error(26, self.token)
+        return False
+    else:
+      self.Error(9, self.token)  
+      return False
 
   def expresion(self):
     # <expresión> → <expr_simple> <expresiónPrime> 
@@ -400,25 +442,135 @@ class Sintactico:
       return
 
   def expresionPrime(self):
-    return True
+    # <expresiónPrime> → oprel <expr_simple>	
+    if self.token.cat == "OpRelacional":
+      self.Avanza()
+      return self.expr_simple()
+    # <expresiónPrime> → λ
+    elif self.token.cat in ["ParentesisCierre", "PuntoComa"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["HACER", "SINO", "ENTONCES"]):
+      return True
+    else:
+      self.Error(28, self.token)
+      return False
+    
     
   def expr_simple(self):
-    return True
+    # <expr_simple> → <término> <resto_exsimple>
+    if self.token.cat in ["Identificador", "Numero", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
+      if self.termino():
+        return self.restoexpr_simple()
+      else:
+        return False
+    # <expr_simple> → <signo> <término> <resto_exsimple>		
+    elif self.token.cat == "OpSuma":
+      if self.signo():
+        if self.termino():
+          return self.restoexpr_simple()
+        else:
+          return False
+      else:
+        return False
+    else:
+      self.Error(29, self.token)
+      return False
   
   def restoexpr_simple(self):
-    return True
+    # <resto_exsimple> → opsuma <término> <resto_exsimple>
+    if self.token.cat == "OpSuma":
+      self.Avanza()
+      if self.termino():
+        return self.restoexpr_simple()
+      else:
+        return False
+    #	<resto_exsimple> → O <término> <resto_exsimple>
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "O":
+      self.Avanza()
+      if self.termino():
+        return self.restoexpr_simple()
+      else:
+        return False
+    elif self.token.cat in ["ParentesisCierre", "CorcheteCierre", "OpRelacional", "PuntoComa"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["HACER", "SINO", "ENTONCES"]):
+      return True
+    else:
+      self.Error(30, self.token)
+      return False
+
 
   def termino(self):
-    return True
+    # <término> → <factor> <resto_term>	
+    if self.factor():
+      return self.resto_term()
+    else:
+      return False
   
   def resto_term(self):
-    return True
+    # <resto_term> → opmult <factor> <resto_term>
+    if self.token.cat == "OpMultiplicacion":
+      self.Avanza()
+      if self.factor():
+        return self.resto_term()
+      else:
+        return False
+    # <resto_term> → Y <factor> <resto_term>
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "Y":
+      if self.factor():
+        return self.resto_term()
+      else:
+        return False
+    # <resto_term> → λ	
+    elif self.token.cat in ["ParentesisCierre", "CorcheteCierre", "OpRelacional", "PuntoComa", "OpSuma"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["HACER", "SINO", "ENTONCES", "O"]):
+      return True
+    else:
+      self.Error(31, self.token)
+      return False
+
 
   def factor(self):
-    return True
+    #	<factor> → <variable>
+    if self.token.cat == "Identificador":
+      return self.variable()
+    # <factor> → num
+    elif self.token.cat == "Numero":
+      self.Avanza()
+      return True
+    #	<factor> → ( <expresión> )
+    elif self.token.cat == "ParentesisApertura":
+      self.Avanza
+      if self.expresion():
+        if self.token.cat == "ParentesisCierre":
+          self.Avanza()
+          return True
+        else:
+          self.Error(27, self.token)
+          return False
+      else:
+        return False
+    # <factor> → NO <factor>
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "NO":
+      self.Avanza()
+      return self.factor()
+    # <factor> → CIERTO
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "CIERTO":
+      self.Avanza()
+      return True
+    # <factor> → FALSO
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "FALSE":
+      self.Avanza()
+      return True
+    else:
+      self.Error(32, self.token)
+      return False
+
 
   def signo(self):
-    return True
+    # <signo> → +
+    # <signo> → -
+    if self.token.cat == "OpSuma":
+      self.Avanza()
+      return True
+    else:
+      self.Error(33, self.token)
+      return False
 
 
     
