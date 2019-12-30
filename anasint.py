@@ -467,7 +467,7 @@ class Sintactico:
         self.Error(3, self.token)
         categoriasLocal = categorias[:] + ["Identificador"]
         reservadasLocal = reservadas[:] + ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
-        self.Sincroniza(categoriasLocal, reservadasLocal, "PalabraReservada", "FIN")
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PuntoComa", None)
         if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
           return
 
@@ -493,60 +493,91 @@ class Sintactico:
     # Siguientes y palabras reservadas
     categorias = ["PuntoComa"]
     reservadas = ["SINO"]
-
-    # Aceptacion
-    aceptacion = True
     
     # <instrucción> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
       self.Avanza()
-      aceptacion = aceptacion and self.lista_inst()
+
+      self.lista_inst()
+
       if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
         self.Avanza()
-        return aceptacion
       else:
         self.Error(12, self.token)
-        self.Sincroniza(categorias, reservadas)
+        categoriasLocal = categorias[:]
+        reservadasLocal = reservadas[:]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PalabraReservada", "FIN")
+        if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+          return
+
     # <instrucción> → <inst_simple>	
     elif self.token.cat == "Identificador":
-      return self.inst_simple()
+
+      self.inst_simple()
+
     # <instrucción> → <inst_es>	
     elif self.token.cat == "PalabraReservada" and self.token.palabra in ["LEE", "ESCRIBE"]:
-      return self.inst_es()
+
+      self.inst_es()
+
     # <instrucción> →  SI <expresion> ENTONCES <instrucción> SINO <instrucción>
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "SI":
       self.Avanza()
-      aceptacion = aceptacion and self.expresion()
+
+      self.expresion()
+
       if self.token.cat == "PalabraReservada" and self.token.palabra == "ENTONCES":
         self.Avanza()
-        aceptacion = aceptacion and self.instruccion()
-        if self.token.cat == "PalabraReservada" and self.token.palabra == "SINO":
-          self.Avanza()
-          return aceptacion and self.instruccion()
-        else:
-          self.Error(21, self.token)
-          self.Sincroniza(categorias, reservadas)
-          return False
       else:
         self.Error(18, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
+        categoriasLocal = categorias[:] + ["Identificador"]
+        reservadasLocal = reservadas[:] + ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PalabraReservada", "ENTONCES")
+        if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+          return
+
+      self.instruccion()
+
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "SINO":
+        self.Avanza()
+      else:
+        self.Error(21, self.token)
+        categoriasLocal = categorias[:] + ["Identificador"]
+        reservadasLocal = reservadas[:] + ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PalabraReservada", "SINO")
+        if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+          return
+
+        self.instruccion()
+    
+
     # <instrucción> →  MIENTRAS <expresión> HACER <instrucción>	
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "MIENTRAS":
       self.Avanza()
-      aceptacion = aceptacion and self.expresion()
+
+      self.expresion()
+
       if self.token.cat == "PalabraReservada" and self.token.palabra == "HACER":
         self.Avanza()
-        return aceptacion and self.instruccion()
       else:
         self.Error(34, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
+        categoriasLocal = categorias[:] + ["Identificador"]
+        reservadasLocal = reservadas[:] + ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PalabraReservada", "HACER")
+        if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+          return
+
+      self.instruccion()
+
+    # No se ha encontrado ningún primero, sincronizacion
     else:
       self.Error(25, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
-    
+      categoriasLocal = categorias[:] + ["Identificador"]
+      reservadasLocal = reservadas[:] + ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
+        self.instruccion()
+
 
   # No Terminal Inst_Simple
   def inst_simple(self):
@@ -558,11 +589,18 @@ class Sintactico:
     if self.token.cat == "Identificador":
       #<inst_simple> -> id <resto_instsimple>
       self.Avanza()
-      return self.resto_instsimple()
+
+      self.resto_instsimple()
+
+    # No se ha encontrado ningún primero, sincronizacion
     else:
       self.Error(2, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      categoriasLocal = categorias[:] + ["Identificador"]
+      reservadasLocal = reservadas[:]
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "Identificador":
+        self.inst_simple()
+
 
   # No Terminal Resto_Instsimple
   def resto_instsimple(self):
@@ -570,55 +608,76 @@ class Sintactico:
     # Siguientes y palabras reservadas
     categorias = ["PuntoComa"]
     reservadas = ["SINO"]
-
-    # Aceptacion
-    aceptacion = True
     
     if self.token.cat == "OpAsigna":
       # <resto_instsimple> -> opasigna <expresion>
       self.Avanza()
-      return self.expresion()
+
+      self.expresion()
+
     elif self.token.cat == "CorcheteApertura":
       # <resto_instsimple> -> [<expr_simple>] opasigna <expresion>
       self.Avanza()
-      aceptacion = aceptacion and self.expr_simple()
+
+      self.expr_simple()
+
       if self.token.cat == "CorcheteCierre":
         self.Avanza()
-        if self.token.cat == "OpAsigna":
-          self.Avanza()
-          return aceptacion and self.expresion()
-        else:
-          self.Error(20, self.token)
-          self.Sincroniza(categorias, reservadas)
-          return False
       else:
         self.Error(15, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
+        categoriasLocal = categorias[:] + ["OpAsigna"]
+        reservadasLocal = reservadas[:]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "CorcheteCierre", None)
+        if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+          return
+
+      if self.token.cat == "OpAsigna":
+        self.Avanza()
+      else:
+        self.Error(20, self.token)
+        categoriasLocal = categorias[:] + ["Identificador", "Numero", "ParentesisApertura", "OpSuma"]
+        reservadasLocal = reservadas[:] + ["NO", "CIERTO", "FALSO"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "OpAsigna", None)
+        if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+          return
+      
+      self.expresion()
+
     elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
       # Siguientes
       return True
+
+    # No se ha encontrado ningún primero ni siguientes, sincronizacion
     else:
       self.Error(8, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      categoriasLocal = categorias[:] + ["OpAsigna", "CorcheteApertura"]
+      reservadasLocal = reservadas[:]
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat in ["OpAsigna", "CorcheteApertura"]:
+        self.resto_instsimple()
 
 
   # No Terminal Variable
   def variable(self):
 
     # Siguientes y palabras reservadas
-    categorias = ["OpMultiplicacion", "OpSuma", "CorcheteCierre", "ParentesisCierre","OpRelacional", "PuntoComa"]
+    categorias = ["OpMultiplicacion", "OpSuma", "CorcheteCierre", "ParentesisCierre", "OpRelacional", "PuntoComa"]
     reservadas = ["Y", "O", "HACER", "SINO", "ENTONCES"]
     
     if self.token.cat == "Identificador":
       # <variable> -> id <resto_var>
       self.Avanza()
-      return self.resto_var()
+
+      self.resto_var()
+
+    # No se ha encontrado ningún primero, sincronizacion
     else:
-      self.Error(22, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      self.Error(2, self.token)
+      categoriasLocal = categorias[:] + ["Identificador"]
+      reservadasLocal = reservadas[:]
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "Identificador":
+        self.variable()
 
 
   # No Terminal Resto_Var
@@ -627,28 +686,35 @@ class Sintactico:
     # Siguientes y palabras reservadas
     categorias = ["OpMultiplicacion", "OpSuma", "CorcheteCierre", "ParentesisCierre","OpRelacional", "PuntoComa"]
     reservadas = ["Y", "O", "HACER", "SINO", "ENTONCES"]
-
-    # Aceptacion
-    aceptacion = True
     
     if self.token.cat == "CorcheteApertura":
       # <resto_var> -> [<expr_simple>]
       self.Avanza()
-      aceptacion = aceptacion and self.expr_simple()
+
+      self.expr_simple()
+
       if self.token.cat == "CorcheteCierre":
         self.Avanza()
-        return aceptacion
       else:
         self.Error(15, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
+        categoriasLocal = categorias[:] 
+        reservadasLocal = reservadas[:]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "CorcheteCierre", None)
+        if self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
+          return
+
     elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
-      # SIGUIENTES
-      return True
+      # Siguientes
+      return
+
+    # No se ha encontrado ningún primero, sincronizacion
     else:
       self.Error(23, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      categoriasLocal = categorias[:] + ["CorcheteApertura"]
+      reservadasLocal = reservadas[:]
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "CorcheteApertura":
+        self.resto_var()
 
 
   # No Terminal Inst_Es
