@@ -3,7 +3,7 @@ VAR i,x:ENTERO;
 	a,b,c: VECTOR [5] DE BOOLEANO;
 INICIO
 	i:=0.00;
-	MIENTRAS i[5] = 3.3 5 HACER
+	MIENTRAS i[5] = 3.3 + 5 HACER
 		INICIO
 			x:=i/4;
 			ESCRIBE(x);

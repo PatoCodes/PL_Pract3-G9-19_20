@@ -11,16 +11,31 @@ import errores
 
 
 class Sintactico:
-#Constructor de la clase que implementa el Analizador Sintactico
-#Solicita el primer compnente lexico 
+  # Constructor de la clase que implementa el Analizador Sintactico
+  # Solicita el primer compnente lexico 
   def __init__(self, lexico):
     self.lexico= lexico
     self.token=self.lexico.Analiza()
 
+  # Wrapper para obtener el siguiente componente léxico
   def Avanza(self):
     self.token=self.lexico.Analiza()
 
-# Funcion que muestra los mensajes de error
+  # Método de sincronización para tratamiento de errores en modo pánico
+  # Se toman por separado las palabras reservadas 
+  # El método se llama siempre que existe un error
+  # Las categorías y palabras reservadas se corresponden con los siguientes de la clase
+  def Sincroniza(self, categorias, reservadas):
+    
+    # Nos aseguramos de que EOF esté en las categorias
+    categorias.append("EOF")
+
+    # Avanzamos hasta que encontramos una categoría de sincronización
+    while self.token.cat not in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra not in reservadas):
+      self.Avanza()
+
+
+  # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
     if nerr == 1: #PROGRAMA
       print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba PROGRAMA en la cabecera del programa")
@@ -94,6 +109,14 @@ class Sintactico:
 
   # No Terminal Programa
   def Programa(self):
+
+    # Siguientes y palabras reservadas
+    categorias = []
+    reservadas = []
+
+    # Aceptacion
+    aceptacion = True
+
     if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
       #<Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
       self.Avanza()
@@ -101,117 +124,156 @@ class Sintactico:
         self.Avanza()
         if self.token.cat == "PuntoComa":
           self.Avanza()
-          if self.decl_var():
-            if self.instrucciones():
-              if self.token.cat == "Punto":
-                #FINAL DE FICHERO
-                self.Avanza()
-                if self.token.cat == "EOF":
-                  return True
-                else:
-                  self.Error(5, self.token)
-                  return False
-              else:
-                self.Error(4, self.token)
-                return False
+          aceptacion = aceptacion and self.decl_var()
+          aceptacion = aceptacion and self.instrucciones()
+          if self.token.cat == "Punto":
+            #FINAL DE FICHERO
+            self.Avanza()
+            if self.token.cat == "EOF":
+              return aceptacion
             else:
+              self.Error(5, self.token)
+              self.Sincroniza(categorias, reservadas)
               return False
           else:
+            self.Error(4, self.token)
+            self.Sincroniza(categorias, reservadas)
             return False
         else:
           self.Error(3, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
       else:
         self.Error(2, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     else:
-      self.Error(1, self.token) 
+      self.Error(1, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Decl_Var  
   def decl_var(self):
+    
+    # Siguientes y palabras reservadas
+    categorias = []
+    reservadas = ["INICIO"]
+
+    # Aceptacion
+    aceptacion = True
+
     # <decl_var> -> VAR <lista_id> : <tipo> ; <decl_v>
     if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
       self.Avanza()
-      if self.lista_id():
-        if self.token.cat == "DosPuntos":
+      aceptacion = aceptacion and self.lista_id()
+      if self.token.cat == "DosPuntos":
+        self.Avanza()
+        aceptacion = aceptacion and self.tipo()
+        if self.token.cat == "PuntoComa":
           self.Avanza()
-          if self.tipo():
-            if self.token.cat == "PuntoComa":
-              self.Avanza()
-              return self.decl_v()
-            else:
-              self.Error(3, self.token)
-              return False
-          else:
-            return False
+          return aceptacion and self.decl_v()  
         else:
-          self.Error(7, self.token)
+          self.Error(3, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
       else:
+        self.Error(7, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     else:
-      if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+      if self.token.cat == "PalabraReservada" and self.token.palabra in reservadas:
+        # Siguientes
         return True
       else:
         self.Error(6, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
   
+
   # No Terminal Decl_V
   def decl_v(self):
+
+    # Siguientes y palabras reservadas
+    categorias = []
+    reservadas = ["INICIO"]
+
+    # Aceptacion
+    aceptacion = True
+
     if self.token.cat == "Identificador":
       #<decl_v> → <lista_id> : <tipo> ; <decl_v>
-      if self.lista_id():
-        if self.token.cat == "DosPuntos":
+      aceptacion = aceptacion and self.lista_id()
+      if self.token.cat == "DosPuntos":
+        self.Avanza()
+        aceptacion = aceptacion and self.tipo()
+        if self.token.cat == "PuntoComa":
           self.Avanza()
-          if self.tipo():
-            if self.token.cat == "PuntoComa":
-              self.Avanza()
-              return self.decl_v()
-            else:
-              self.Error(3, self.token)
-              return False
-          else:
-            return False
+          return aceptacion and self.decl_v()
         else:
-          self.Error(7, self.token)
+          self.Error(3, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
-    elif self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO"]:
+      else:
+        self.Error(7, self.token)
+        self.Sincroniza(categorias, reservadas)
+        return False
+    elif self.token.cat == "PalabraReservada" and self.token.palabra in reservadas:
       #Siguientes
       return True
     else:
       self.Error(2, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Lista_Id
   def lista_id(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["DosPuntos"]
+    reservadas = []
+
     #<lista_id> → id <resto_listaid>
     if self.token.cat == "Identificador":
       self.Avanza()
       return self.resto_listaid()
     else:
       self.Error(2, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Resto_Listaid
   def resto_listaid(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["DosPuntos"]
+    reservadas = []
+    
     #<resto_listaid> →  , <lista_id>
     if self.token.cat == "Coma":
       self.Avanza()
       return self.lista_id()
-    #Siguientes
-    elif self.token.cat == "DosPuntos":
+    # Siguientes
+    elif self.token.cat in categorias:
       return True
     else:
       self.Error(17, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Tipo
   def tipo(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["PuntoComa"]
+    reservadas = []
+    
     if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
       #<Tipo> → <tipo_std>
-      if self.tipo_std(): 	
-        return True
+      return self.tipo_std()	
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "VECTOR":
       #<Tipo> → VECTOR [num] DE <Tipo_std>
       self.Avanza()
@@ -226,22 +288,33 @@ class Sintactico:
               return self.tipo_std()
             else:
               self.Error(16, self.token)
+              self.Sincroniza(categorias, reservadas)
               return False
           else:
             self.Error(15, self.token)
+            self.Sincroniza(categorias, reservadas)
             return False
         else:
           self.Error(14, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
       else:
         self.Error(13, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     else:
       self.Error(10, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Tipo_Std
   def tipo_std(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["PuntoComa"]
+    reservadas = []
+    
     if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO","REAL","BOOLEANO"]:
       #<Tipo_std> → ENTERO
       #<Tipo_std> → REAL
@@ -250,59 +323,86 @@ class Sintactico:
       return True
     else:
       self.Error(19, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Instrucciones
   def instrucciones(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["Punto"]
+    reservadas = []
+
+    # Aceptacion
+    aceptacion = True
+    
     #<instrucciones> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
       self.Avanza()
-      if self.lista_inst():
-        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
-          self.Avanza()            
-          return True
-        else:
-          self.Error(12, self.token)
-          return False
+      aceptacion = aceptacion and self.lista_inst()
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+        self.Avanza()            
+        return aceptacion
       else:
+        self.Error(12, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     else:
       self.Error(11, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Lista_Inst
   def lista_inst(self):
+
+    # Siguientes y palabras reservadas
+    categorias = []
+    reservadas = ["FIN"]
+
+    # Aceptacion
+    aceptacion = True
+    
     # <lista_inst> → <instrucción> ; <lista_inst>
     if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
-      if self.instruccion():
-        if self.token.cat == "PuntoComa":
-          self.Avanza()
-          return self.lista_inst()
-        else:
-          self.Error(3, self.token)
-          return False
+      aceptacion = aceptacion and self.instruccion()
+      if self.token.cat == "PuntoComa":
+        self.Avanza()
+        return aceptacion and self.lista_inst()
       else:
+        self.Error(3, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     # Siguientes
-    elif self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+    elif self.token.cat == "PalabraReservada" and self.token.palabra in reservadas:
       return True
     else:
       self.Error(12, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
   
+
   # No Terminal Instruccion
   def instruccion(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["PuntoComa"]
+    reservadas = ["SINO"]
+
+    # Aceptacion
+    aceptacion = True
+    
     # <instrucción> → INICIO <lista_inst> FIN
     if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
       self.Avanza()
-      if self.lista_inst():
-        if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
-          self.Avanza()
-          return True
-        else:
-          self.Error(12, self.token)
+      aceptacion = aceptacion and self.lista_inst()
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+        self.Avanza()
+        return aceptacion
       else:
-        return False
+        self.Error(12, self.token)
+        self.Sincroniza(categorias, reservadas)
     # <instrucción> → <inst_simple>	
     elif self.token.cat == "Identificador":
       return self.inst_simple()
@@ -312,51 +412,64 @@ class Sintactico:
     # <instrucción> →  SI <expresion> ENTONCES <instrucción> SINO <instrucción>
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "SI":
       self.Avanza()
-      if self.expresion():
-        if self.token.cat == "PalabraReservada" and self.token.palabra == "ENTONCES":
+      aceptacion = aceptacion and self.expresion()
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "ENTONCES":
+        self.Avanza()
+        aceptacion = aceptacion and self.instruccion()
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "SINO":
           self.Avanza()
-          if self.instruccion():
-            if self.token.cat == "PalabraReservada" and self.token.palabra == "SINO":
-              self.Avanza()
-              return self.instruccion()
-            else:
-              self.Error(21, self.token)
-              return False
-          else:
-            return False
+          return aceptacion and self.instruccion()
         else:
-          self.Error(18, self.token)
+          self.Error(21, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
       else:
+        self.Error(18, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     # <instrucción> →  MIENTRAS <expresión> HACER <instrucción>	
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "MIENTRAS":
       self.Avanza()
-      if self.expresion():
-        if self.token.cat == "PalabraReservada" and self.token.palabra == "HACER":
-          self.Avanza()
-          return self.instruccion()
-        else:
-          self.Error(34, self.token)
-          return False
+      aceptacion = aceptacion and self.expresion()
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "HACER":
+        self.Avanza()
+        return aceptacion and self.instruccion()
       else:
+        self.Error(34, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     else:
       self.Error(25, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
     
+
   # No Terminal Inst_Simple
   def inst_simple(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["PuntoComa"]
+    reservadas = ["SINO"]
+    
     if self.token.cat == "Identificador":
       #<inst_simple> -> id <resto_instsimple>
       self.Avanza()
       return self.resto_instsimple()
     else:
       self.Error(2, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
 
   # No Terminal Resto_Instsimple
   def resto_instsimple(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["PuntoComa"]
+    reservadas = ["SINO"]
+
+    # Aceptacion
+    aceptacion = True
+    
     if self.token.cat == "OpAsigna":
       # <resto_instsimple> -> opasigna <expresion>
       self.Avanza()
@@ -364,61 +477,86 @@ class Sintactico:
     elif self.token.cat == "CorcheteApertura":
       # <resto_instsimple> -> [<expr_simple>] opasigna <expresion>
       self.Avanza()
-      if self.expr_simple():
-        if self.token.cat == "CorcheteCierre":
+      aceptacion = aceptacion and self.expr_simple()
+      if self.token.cat == "CorcheteCierre":
+        self.Avanza()
+        if self.token.cat == "OpAsigna":
           self.Avanza()
-          if self.token.cat == "OpAsigna":
-            self.Avanza()
-            return self.expresion()
-          else:
-            self.Error(20, self.token)
-            return False
+          return aceptacion and self.expresion()
         else:
-          self.Error(15, self.token)
+          self.Error(20, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
       else:
+        self.Error(15, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
-    elif self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
+    elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
       # Siguientes
       return True
     else:
       self.Error(8, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Variable
   def variable(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["OpMultiplicacion", "OpSuma", "CorcheteCierre", "ParentesisCierre","OpRelacional", "PuntoComa"]
+    reservadas = ["Y", "O", "HACER", "SINO", "ENTONCES"]
+    
     if self.token.cat == "Identificador":
       # <variable> -> id <resto_var>
       self.Avanza()
       return self.resto_var()
     else:
       self.Error(22, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Resto_Var
   def resto_var(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["OpMultiplicacion", "OpSuma", "CorcheteCierre", "ParentesisCierre","OpRelacional", "PuntoComa"]
+    reservadas = ["Y", "O", "HACER", "SINO", "ENTONCES"]
+
+    # Aceptacion
+    aceptacion = True
+    
     if self.token.cat == "CorcheteApertura":
       # <resto_var> -> [<expr_simple>]
       self.Avanza()
-      if self.expr_simple():
-        if self.token.cat == "CorcheteCierre":
-          self.Avanza()
-          return True
-        else:
-          self.Error(15, self.token)
-          return False
+      aceptacion = aceptacion and self.expr_simple()
+      if self.token.cat == "CorcheteCierre":
+        self.Avanza()
+        return aceptacion
       else:
+        self.Error(15, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
-    elif self.token.cat in ["OpMultiplicacion","OpSuma","CorcheteCierre","ParentesisCierre", "OpRelacional", "PuntoComa"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["Y","O","HACER","SINO","ENTONCES"]):
+    elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
       # SIGUIENTES
       return True
     else:
-      print(self.token)
       self.Error(23, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Inst_Es
   def inst_es(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["PuntoComa"]
+    reservadas = ["SINO"]
+
+    # Aceptacion
+    aceptacion = True
+    
     # <inst_es> → LEE(id)
     if self.token.cat == "PalabraReservada" and self.token.palabra == "LEE":
       self.Avanza()
@@ -431,136 +569,185 @@ class Sintactico:
             return True
           else:
             self.Error(27, self.token)
+            self.Sincroniza(categorias, reservadas)
             return False
         else:
           self.Error(2, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
       else:
         self.Error(26, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
-    # <inst_es> → ESCRIBE ( <expr_simple>)	
+    # <inst_es> → ESCRIBE (<expr_simple>)	
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "ESCRIBE":
       self.Avanza()
       if self.token.cat == "ParentesisApertura":
         self.Avanza()
-        if self.expr_simple():
-          if self.token.cat == "ParentesisCierre":
-            self.Avanza()
-            return True
-          else:     
-            self.Error(27, self.token)
-            return False
-        else:
-          self.Error(2, self.token)
+        aceptacion = aceptacion and self.expr_simple()
+        if self.token.cat == "ParentesisCierre":
+          self.Avanza()
+          return aceptacion
+        else:     
+          self.Error(27, self.token)
+          self.Sincroniza(categorias, reservadas)
           return False
       else:
         self.Error(26, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     else:
-      self.Error(9, self.token)  
+      self.Error(9, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Expresion
   def expresion(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["ParentesisCierre", "PuntoComa"]
+    reservadas = ["HACER", "SINO", "ENTONCES"]
+
+    # Aceptacion
+    aceptacion = True
+    
     # <expresión> → <expr_simple> <expresiónPrime> 
     if self.token.cat in ["Identificador", "Numero", "OpSuma", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
-      if self.expr_simple():
-        return self.expresionPrime()
-      else:
-        return False
+      aceptacion = aceptacion and self.expr_simple()
+      return aceptacion and self.expresionPrime()
     else:
       self.Error(24, self.token)
+      self.Sincroniza(categorias, reservadas)
       return
+
 
   # No Terminal ExpresionPrime
   def expresionPrime(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["ParentesisCierre", "PuntoComa"]
+    reservadas = ["HACER", "SINO", "ENTONCES"]
+    
     # <expresiónPrime> → oprel <expr_simple>
     if self.token.cat == "OpRelacional":
       self.Avanza()
       return self.expr_simple()
     # <expresiónPrime> → λ
-    elif self.token.cat in ["ParentesisCierre", "PuntoComa"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["HACER", "SINO", "ENTONCES"]):
+    elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
       return True
     else:
       self.Error(28, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
     
+
   # No Terminal Expr_Simple
   def expr_simple(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["CorcheteCierre", "ParentesisCierre", "OpRelacional", "PuntoComa"]
+    reservadas = ["HACER", "SINO", "ENTONCES"]
+
+    # Aceptacion
+    aceptacion = True
+    
     # <expr_simple> → <término> <resto_exsimple>
     if self.token.cat in ["Identificador", "Numero", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
-      if self.termino():
-        return self.restoexpr_simple()
-      else:
-        return False
+      aceptacion = aceptacion and self.termino()
+      return aceptacion and self.restoexpr_simple()
     # <expr_simple> → <signo> <término> <resto_exsimple>		
     elif self.token.cat == "OpSuma":
-      if self.signo():
-        if self.termino():
-          return self.restoexpr_simple()
-        else:
-          return False
-      else:
-        return False
+      aceptacion = aceptacion and self.signo()
+      aceptacion = aceptacion and self.termino()
+      return aceptacion and self.restoexpr_simple()
     else:
       self.Error(29, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
   
+
   # No Terminal Restoexpr_Simple
   def restoexpr_simple(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["CorcheteCierre", "ParentesisCierre", "OpRelacional", "PuntoComa"]
+    reservadas = ["HACER", "SINO", "ENTONCES"]
+
+    # Aceptacion
+    aceptacion = True
+    
     # <resto_exsimple> → opsuma <término> <resto_exsimple>
     if self.token.cat == "OpSuma":
       self.Avanza()
-      if self.termino():
-        return self.restoexpr_simple()
-      else:
-        return False
+      aceptacion = aceptacion and self.termino()
+      return aceptacion and self.restoexpr_simple()
     #	<resto_exsimple> → O <término> <resto_exsimple>
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "O":
       self.Avanza()
-      if self.termino():
-        return self.restoexpr_simple()
-      else:
-        return False
-    elif self.token.cat in ["ParentesisCierre", "CorcheteCierre", "OpRelacional", "PuntoComa"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["HACER", "SINO", "ENTONCES"]):
+      aceptacion = aceptacion and self.termino()
+      return aceptacion and self.restoexpr_simple()
+    elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
       return True
     else:
       self.Error(30, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Termino
   def termino(self):
+
+    # Aceptacion
+    aceptacion = True
+    
     # <término> → <factor> <resto_term>
     if self.token.cat in ["Identificador", "Numero", "ParentesisApertura"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["NO", "CIERTO", "FALSO"]):
-      if self.factor():
-        return self.resto_term()
-      else:
-        return False
+      aceptacion = aceptacion and self.factor()
+      return aceptacion and self.resto_term()
+    else:
+      return False
   
+
   # No Terminal Resto_Term
   def resto_term(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["OpSuma", "CorcheteCierre", "ParentesisCierre", "OpRelacional", "PuntoComa"]
+    reservadas = ["O", "HACER", "SINO", "ENTONCES"]
+
+    # Aceptacion
+    aceptacion = True
+    
     # <resto_term> → opmult <factor> <resto_term>
     if self.token.cat == "OpMultiplicacion":
       self.Avanza()
-      if self.factor():
-        return self.resto_term()
-      else:
-        return False
+      aceptacion = aceptacion and self.factor()
+      return aceptacion and self.resto_term()
     # <resto_term> → Y <factor> <resto_term>
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "Y":
-      if self.factor():
-        return self.resto_term()
-      else:
-        return False
+      self.Avanza()
+      aceptacion = aceptacion and self.factor()
+      return aceptacion and self.resto_term()
     # <resto_term> → λ	
-    elif self.token.cat in ["ParentesisCierre", "CorcheteCierre", "OpRelacional", "PuntoComa", "OpSuma"] or (self.token.cat == "PalabraReservada" and self.token.palabra in ["HACER", "SINO", "ENTONCES", "O"]):
+    elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
       return True
     else:
       self.Error(31, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Factor
   def factor(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["OpMultiplicacion", "OpSuma", "CorcheteCierre", "ParentesisCierre", "OpRelacional", "PuntoComa"]
+    reservadas = ["Y", "O", "HACER", "SINO", "ENTONCES"]
+
+    # Aceptacion
+    aceptacion = True
+    
     #	<factor> → <variable>
     if self.token.cat == "Identificador":
       return self.variable()
@@ -571,14 +758,13 @@ class Sintactico:
     # <factor> → ( <expresión> )
     elif self.token.cat == "ParentesisApertura":
       self.Avanza()
-      if self.expresion():
-        if self.token.cat == "ParentesisCierre":
-          self.Avanza()
-          return True
-        else:
-          self.Error(27, self.token)
-          return False
+      aceptacion = aceptacion and self.expresion()
+      if self.token.cat == "ParentesisCierre":
+        self.Avanza()
+        return aceptacion
       else:
+        self.Error(27, self.token)
+        self.Sincroniza(categorias, reservadas)
         return False
     # <factor> → NO <factor>
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "NO":
@@ -594,10 +780,17 @@ class Sintactico:
       return True
     else:
       self.Error(32, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
+
 
   # No Terminal Signo
   def signo(self):
+
+    # Siguientes y palabras reservadas
+    categorias = ["Identificador", "Numero", "ParentesisApertura"]
+    reservadas = ["NO", "CIERTO", "FALSO"]
+    
     # <signo> → +
     # <signo> → -
     if self.token.cat == "OpSuma":
@@ -605,6 +798,7 @@ class Sintactico:
       return True
     else:
       self.Error(33, self.token)
+      self.Sincroniza(categorias, reservadas)
       return False
 
 
