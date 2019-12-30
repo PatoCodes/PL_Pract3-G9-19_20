@@ -218,7 +218,7 @@ class Sintactico:
 
     else:
       self.Error(6, self.token)
-      categoriasLocal = categorias[:] + ["Identificador"]
+      categoriasLocal = categorias[:] + []
       reservadasLocal = reservadas[:] + ["VAR"]
       self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
       if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
@@ -233,33 +233,45 @@ class Sintactico:
     categorias = []
     reservadas = ["INICIO"]
 
-    # Aceptacion
-    aceptacion = True
-
     if self.token.cat == "Identificador":
       #<decl_v> → <lista_id> : <tipo> ; <decl_v>
-      aceptacion = aceptacion and self.lista_id()
+      self.lista_id()
+
       if self.token.cat == "DosPuntos":
         self.Avanza()
-        aceptacion = aceptacion and self.tipo()
-        if self.token.cat == "PuntoComa":
-          self.Avanza()
-          return aceptacion and self.decl_v()
-        else:
-          self.Error(3, self.token)
-          self.Sincroniza(categorias, reservadas)
-          return False
       else:
         self.Error(7, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
-    elif self.token.cat == "PalabraReservada" and self.token.palabra in reservadas:
-      #Siguientes
-      return True
+        categoriasLocal = categorias[:] + []
+        reservadasLocal = reservadas[:] + ["VECTOR", "ENTERO", "REAL", "BOOLEANO"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "DosPuntos", None)
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+          return
+
+      self.tipo()
+
+      if self.token.cat == "PuntoComa":
+        self.Avanza()
+      else:
+        self.Error(3, self.token)
+        categoriasLocal = categorias[:] + ["Identificador"]
+        reservadasLocal = reservadas[:] + []
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PuntoComa", None)
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+          return
+
+      self.decl_v()
+
+    # Siguientes
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+      return
+
     else:
       self.Error(2, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      categoriasLocal = categorias[:] + ["Identificador"]
+      reservadasLocal = reservadas[:] + []
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "Identificador":
+        self.decl_var()
 
 
   # No Terminal Lista_Id
@@ -272,11 +284,16 @@ class Sintactico:
     #<lista_id> → id <resto_listaid>
     if self.token.cat == "Identificador":
       self.Avanza()
-      return self.resto_listaid()
+      
+      self.resto_listaid()
+    
     else:
       self.Error(2, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      categoriasLocal = categorias[:] + ["Identificador"]
+      reservadasLocal = reservadas[:] + []
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "Identificador":
+        self.lista_id()
 
 
   # No Terminal Resto_Listaid
@@ -289,14 +306,20 @@ class Sintactico:
     #<resto_listaid> →  , <lista_id>
     if self.token.cat == "Coma":
       self.Avanza()
+
       return self.lista_id()
+
     # Siguientes
-    elif self.token.cat in categorias:
-      return True
+    elif self.token.cat == "DosPuntos":
+      return
+
     else:
       self.Error(17, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      categoriasLocal = categorias[:] + ["Coma"]
+      reservadasLocal = reservadas[:] + []
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "Coma":
+        self.resto_listaid()
 
 
   # No Terminal Tipo
