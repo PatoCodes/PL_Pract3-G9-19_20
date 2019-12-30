@@ -29,9 +29,8 @@ class Sintactico:
     
     # Nos aseguramos de que EOF esté en las categorias
     categorias.append("EOF")
-
     # Avanzamos hasta que encontramos una categoría de sincronización
-    while self.token.cat not in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra not in reservadas):
+    while (self.token.cat != "PalabraReservada" and self.token.cat not in categorias) or (self.token.cat == "PalabraReservada" and self.token.palabra not in reservadas):
       self.Avanza()
 
 
