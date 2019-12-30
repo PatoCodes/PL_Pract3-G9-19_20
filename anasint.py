@@ -17,6 +17,12 @@ class Sintactico:
     self.lexico= lexico
     self.token=self.lexico.Analiza()
 
+    # Se prepara un booleano global que indica aceptación o rechazo del programa. Por defecto, los programas se aceptan (y se rechazan cuando se encuentra un error)
+    self.aceptacion = True
+
+    # Booleano global para indicar un final de fichero inesperado. Utilizado para el tratamiento de errores
+    self.finFichero = False
+
   # Wrapper para obtener el siguiente componente léxico
   def Avanza(self):
     self.token=self.lexico.Analiza()
@@ -25,85 +31,107 @@ class Sintactico:
   # Se toman por separado las palabras reservadas 
   # El método se llama siempre que existe un error
   # Las categorías y palabras reservadas se corresponden con los siguientes de la clase
-  def Sincroniza(self, categorias, reservadas):
+  def Sincroniza(self, categoriasSiguientes, reservadasSiguientes, categoria, reservada):
     
+    # Introducimos el elemento esperado en la lista
+    if categoria != "PalabraReservada":
+      categoriasSiguientes.append(categoria)
+    else:
+      reservadasSiguientes.append(reservada)
+
     # Nos aseguramos de que EOF esté en las categorias
-    categorias.append("EOF")
+    categoriasSiguientes.append("EOF")
+
     # Avanzamos hasta que encontramos una categoría de sincronización
-    while (self.token.cat != "PalabraReservada" and self.token.cat not in categorias) or (self.token.cat == "PalabraReservada" and self.token.palabra not in reservadas):
+    while (self.token.cat != "PalabraReservada" and self.token.cat not in categoriasSiguientes) or (self.token.cat == "PalabraReservada" and self.token.palabra not in reservadasSiguientes):
       self.Avanza()
+
+    # Si hemos sincronizado con el elemento esperado, lo "eliminamos"
+    if (self.token.cat == categoria) or (self.token.cat == "PalabraReservada" and self.token.palabra == reservada):
+      self.Avanza()
+    # Si hemos sincronizado con un EOF (y no era nuestra intención), intentamos emitir un mensaje de error adecuado
+    elif (self.token.cat == "EOF"):
+      self.Error(99,self.token)
+    
 
 
   # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
-    if nerr == 1: #PROGRAMA
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba PROGRAMA en la cabecera del programa")
-    elif nerr == 2: #identificador
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador")
-    elif nerr == 3: #Falta punto y coma
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
-    elif nerr == 4: #Programa debe acabar con .
-      print ("Linea: " + str(self.token.linea) + "  ERROR: La definición del programa debe acabar con un .")
-    elif nerr == 5: #Categorías despues del final de fichero
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
-    elif nerr == 6: #decl_var
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una instrucción")
-    elif nerr == 7: #:
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':' para declaración de tipo")
-    elif nerr == 8: #
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':=', una expresion entre corchetes, un SINO o un ';'")
-    elif nerr == 9: #inst_es
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'LEE' o un 'ESCRIBE'")
-    elif nerr == 10: #Tipo
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo válido (ENTERO, REAL, BOOLEANO) o un vector")
-    elif nerr == 11: #INICIO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba INICIO")
-    elif nerr == 12: #FIN
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN")
-    elif nerr == 13: #Inicio corchete
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba '['")
-    elif nerr == 14: #Número para índice
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un numero como indice")
-    elif nerr == 15: #Cierre corchete
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ']'")
-    elif nerr == 16: #DE
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba la palabra DE para indicar el tipo de un vector")
-    elif nerr == 17: #lista_instr
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o ':'")
-    elif nerr == 18: #ENTONCES
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'ENTONCES'")
-    elif nerr == 19: #TIPO VALIDO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")    
-    elif nerr == 20:
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de asignación ':='")    
-    elif nerr == 21: #SINO
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'SINO'")
-    elif nerr == 22: #Se esperaba una declaración válida de variable
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración válida de variable")
-    elif nerr == 23: #Acceso erroneo a variable
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Acceso erroneo a la variable")
-    elif nerr == 24: #Expresión
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una expresión")
-    elif nerr == 25: #Instrucción
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una instrucción")
-    elif nerr == 26: #Paréntesis apertura
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un '('")
-    elif nerr == 27: #Paréntesis cierre
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un ')'")
-    elif nerr == 28: #Expr_prime
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador relacional, un ')', un ';', un 'HACER', un 'SINO' o un 'ENTONCES'")
-    elif nerr == 29: #Expr_simple
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un signo '+' o un '-' un '(', un 'NO', un 'CIERTO', o un 'FALSO'")
-    elif nerr == 30: #resto_exprsimple
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'")
-    elif nerr == 31: #resto_term
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de suma, multiplicación o relacional; un ')', un ';',un 'HACER', un 'SINO' o un 'ENTONCES'")
-    elif nerr == 32: #factor
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un operador un '(', un 'NO', un 'CIERTO', un 'FALSO', un 'HACER', un 'SINO' o un 'ENTONCES'")
-    elif nerr == 33: #OpSuma
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un símbolo '+' o un '-'")
-    elif nerr == 34: #HACER
-      print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba 'HACER'")
+    # Los mensajes de error se imprimen únicamente si no se ha alcanzado un final de fichero inesperado
+    if not self.finFichero:
+      if nerr == 1: #PROGRAMA
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba PROGRAMA en la cabecera del programa")
+      elif nerr == 2: #identificador
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador")
+      elif nerr == 3: #Falta punto y coma
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Las sentencias deben acabar con punto y coma")
+      elif nerr == 4: #Programa debe acabar con .
+        print ("Linea: " + str(self.token.linea) + "  ERROR: La definición del programa debe acabar con un .")
+      elif nerr == 5: #Categorías despues del final de fichero
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
+      elif nerr == 6: #decl_var
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una instrucción")
+      elif nerr == 7: #:
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':' para declaración de tipo")
+      elif nerr == 8: #
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':=', una expresion entre corchetes, un SINO o un ';'")
+      elif nerr == 9: #inst_es
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'LEE' o un 'ESCRIBE'")
+      elif nerr == 10: #Tipo
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo válido (ENTERO, REAL, BOOLEANO) o un vector")
+      elif nerr == 11: #INICIO
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba INICIO")
+      elif nerr == 12: #FIN
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba FIN")
+      elif nerr == 13: #Inicio corchete
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba '['")
+      elif nerr == 14: #Número para índice
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un numero como indice")
+      elif nerr == 15: #Cierre corchete
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ']'")
+      elif nerr == 16: #DE
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba la palabra DE para indicar el tipo de un vector")
+      elif nerr == 17: #lista_instr
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o ':'")
+      elif nerr == 18: #ENTONCES
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'ENTONCES'")
+      elif nerr == 19: #TIPO VALIDO
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un tipo valido (ENTERO, REAL o BOOLEANO)")    
+      elif nerr == 20:
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de asignación ':='")    
+      elif nerr == 21: #SINO
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'SINO'")
+      elif nerr == 22: #Se esperaba una declaración válida de variable
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una declaración válida de variable")
+      elif nerr == 23: #Acceso erroneo a variable
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Acceso erroneo a la variable")
+      elif nerr == 24: #Expresión
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una expresión")
+      elif nerr == 25: #Instrucción
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una instrucción")
+      elif nerr == 26: #Paréntesis apertura
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un '('")
+      elif nerr == 27: #Paréntesis cierre
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un ')'")
+      elif nerr == 28: #Expr_prime
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador relacional, un ')', un ';', un 'HACER', un 'SINO' o un 'ENTONCES'")
+      elif nerr == 29: #Expr_simple
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un signo '+' o un '-' un '(', un 'NO', un 'CIERTO', o un 'FALSO'")
+      elif nerr == 30: #resto_exprsimple
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'")
+      elif nerr == 31: #resto_term
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un operador de suma, multiplicación o relacional; un ')', un ';',un 'HACER', un 'SINO' o un 'ENTONCES'")
+      elif nerr == 32: #factor
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un identificador, un número, un operador un '(', un 'NO', un 'CIERTO', un 'FALSO', un 'HACER', un 'SINO' o un 'ENTONCES'")
+      elif nerr == 33: #OpSuma
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un símbolo '+' o un '-'")
+      elif nerr == 34: #HACER
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba 'HACER'")
+      
+      elif nerr == 99: #Final de fichero inesperado
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Final de fichero inesperado")
+        # Se deshabilitan el resto de mensajes de error
+        self.finFichero = True
 
 
   # No Terminal Programa
