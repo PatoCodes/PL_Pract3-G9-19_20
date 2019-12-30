@@ -36,7 +36,7 @@ class Sintactico:
     # Introducimos el elemento esperado en la lista
     if categoria != "PalabraReservada":
       categoriasSiguientes.append(categoria)
-    else:
+    elif categoria != None:
       reservadasSiguientes.append(reservada)
 
     # Nos aseguramos de que EOF esté en las categorias
@@ -58,6 +58,7 @@ class Sintactico:
   # Funcion que muestra los mensajes de error
   def Error(self, nerr, tok):
     # Los mensajes de error se imprimen únicamente si no se ha alcanzado un final de fichero inesperado
+    self.aceptacion = False
     if not self.finFichero:
       if nerr == 1: #PROGRAMA
         print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba PROGRAMA en la cabecera del programa")
@@ -70,7 +71,7 @@ class Sintactico:
       elif nerr == 5: #Categorías despues del final de fichero
         print ("Linea: " + str(self.token.linea) + "  ERROR: Componentes inesperados tras el final del programa")
       elif nerr == 6: #decl_var
-        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una instrucción")
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una delaración de variable o una declaración de instrucciones")
       elif nerr == 7: #:
         print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba ':' para declaración de tipo")
       elif nerr == 8: #
@@ -137,86 +138,93 @@ class Sintactico:
   # No Terminal Programa
   def Programa(self):
 
-    # Siguientes y palabras reservadas
-    categorias = []
-    reservadas = []
-
-    # Aceptacion
-    aceptacion = True
-
+    #<Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
     if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
-      #<Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
       self.Avanza()
-      if self.token.cat == "Identificador":
+
+      if self.token.cat == "PuntoComa":
         self.Avanza()
-        if self.token.cat == "PuntoComa":
-          self.Avanza()
-          aceptacion = aceptacion and self.decl_var()
-          aceptacion = aceptacion and self.instrucciones()
-          if self.token.cat == "Punto":
-            #FINAL DE FICHERO
-            self.Avanza()
-            if self.token.cat == "EOF":
-              return aceptacion
-            else:
-              self.Error(5, self.token)
-              self.Sincroniza(categorias, reservadas)
-              return False
-          else:
-            self.Error(4, self.token)
-            self.Sincroniza(categorias, reservadas)
-            return False
-        else:
-          self.Error(3, self.token)
-          self.Sincroniza(categorias, reservadas)
-          return False
       else:
-        self.Error(2, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
+        self.Error(3, self.token)
+        self.Sincroniza([], ["VAR", "INICIO"], "PuntoComa", None)
+        if self.token.cat == "EOF":
+          return
+        
+      self.decl_var()
+
+      self.instrucciones()
+
+      if self.token.cat == "Punto":
+        #FINAL DE FICHERO
+        self.Avanza()
+      else:
+        self.Error(4, self.token)
+        self.Sincroniza(["EOF"], [], "Punto", None)
+        if self.token.cat == "EOF":
+          return
+
+      if self.token.cat == "EOF":
+        return
+      else:
+        self.Error(5, self.token)
+    
     else:
       self.Error(1, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      self.Sincroniza(["Identificador"], [], None, None)
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
+        self.Programa()
 
 
   # No Terminal Decl_Var  
   def decl_var(self):
-    
+
     # Siguientes y palabras reservadas
     categorias = []
     reservadas = ["INICIO"]
 
-    # Aceptacion
-    aceptacion = True
-
     # <decl_var> -> VAR <lista_id> : <tipo> ; <decl_v>
     if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
       self.Avanza()
-      aceptacion = aceptacion and self.lista_id()
+
+      self.lista_id()
+
       if self.token.cat == "DosPuntos":
         self.Avanza()
-        aceptacion = aceptacion and self.tipo()
-        if self.token.cat == "PuntoComa":
-          self.Avanza()
-          return aceptacion and self.decl_v()  
-        else:
-          self.Error(3, self.token)
-          self.Sincroniza(categorias, reservadas)
-          return False
       else:
         self.Error(7, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
-    else:
-      if self.token.cat == "PalabraReservada" and self.token.palabra in reservadas:
-        # Siguientes
-        return True
+        categoriasLocal = categorias[:] + []
+        reservadasLocal = reservadas[:] + ["VECTOR", "ENTERO", "REAL", "BOOLEANO"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "DosPuntos", None)
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+          return
+
+      self.tipo()
+
+      if self.token.cat == "PuntoComa":
+        self.Avanza()
       else:
-        self.Error(6, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
-  
+        self.Error(3, self.token)
+        categoriasLocal = categorias[:] + ["Identificador"]
+        reservadasLocal = reservadas[:] + []
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PuntoComa", None)
+        if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+          return
+
+      self.decl_v()  
+
+    # Siguientes
+    elif self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+      return
+
+    else:
+      self.Error(6, self.token)
+      categoriasLocal = categorias[:] + ["Identificador"]
+      reservadasLocal = reservadas[:] + ["VAR"]
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
+        self.decl_var()
+    
+
 
   # No Terminal Decl_V
   def decl_v(self):
