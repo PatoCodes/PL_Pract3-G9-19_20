@@ -93,7 +93,7 @@ class Sintactico:
       elif nerr == 16: #DE
         print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba la palabra DE para indicar el tipo de un vector")
       elif nerr == 17: #lista_instr
-        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' o ':'")
+        print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba una ',' para declarar otra variable o ':' para una declaración de tipo")
       elif nerr == 18: #ENTONCES
         print ("Linea: " + str(self.token.linea) + "  ERROR: Se esperaba un 'ENTONCES'")
       elif nerr == 19: #TIPO VALIDO
@@ -307,7 +307,7 @@ class Sintactico:
     if self.token.cat == "Coma":
       self.Avanza()
 
-      return self.lista_id()
+      self.lista_id()
 
     # Siguientes
     elif self.token.cat == "DosPuntos":
@@ -331,12 +331,20 @@ class Sintactico:
     
     if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
       #<Tipo> → <tipo_std>
-      return self.tipo_std()	
+      self.tipo_std()	
+
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "VECTOR":
       #<Tipo> → VECTOR [num] DE <Tipo_std>
       self.Avanza()
+
       if self.token.cat == "CorcheteApertura":
         self.Avanza()
+      else:
+        self.Error(13, self.token)
+        categoriasLocal = categorias[:] + ["Numero"]
+        reservadasLocal = reservadas[:] + []
+        self.Sincroniza(categoriasLocal, reservadasLocal, "CorcheteApertura", None)
+
         if self.token.cat == "Numero":
           self.Avanza()
           if self.token.cat == "CorcheteCierre":
@@ -356,14 +364,16 @@ class Sintactico:
           self.Error(14, self.token)
           self.Sincroniza(categorias, reservadas)
           return False
-      else:
-        self.Error(13, self.token)
-        self.Sincroniza(categorias, reservadas)
-        return False
+      
+
+
     else:
       self.Error(10, self.token)
-      self.Sincroniza(categorias, reservadas)
-      return False
+      categoriasLocal = categorias[:] + []
+      reservadasLocal = reservadas[:] + ["VECTOR", "ENTERO", "REAL", "BOOLEANO"]
+      self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
+      if self.token.cat in ["VECTOR", "ENTERO", "REAL", "BOOLEANO"]:
+        self.tipo()
 
 
   # No Terminal Tipo_Std
