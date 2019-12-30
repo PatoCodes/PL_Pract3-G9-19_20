@@ -334,12 +334,12 @@ class Sintactico:
     categorias = ["PuntoComa"]
     reservadas = []
     
+    #<Tipo> → <tipo_std>
     if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
-      #<Tipo> → <tipo_std>
       self.tipo_std()	
 
+    #<Tipo> → VECTOR [num] DE <Tipo_std>
     elif self.token.cat == "PalabraReservada" and self.token.palabra == "VECTOR":
-      #<Tipo> → VECTOR [num] DE <Tipo_std>
       self.Avanza()
 
       if self.token.cat == "CorcheteApertura":
@@ -349,28 +349,40 @@ class Sintactico:
         categoriasLocal = categorias[:] + ["Numero"]
         reservadasLocal = reservadas[:] + []
         self.Sincroniza(categoriasLocal, reservadasLocal, "CorcheteApertura", None)
+        if self.token.cat == "PuntoComa":
+          return
 
-        if self.token.cat == "Numero":
-          self.Avanza()
-          if self.token.cat == "CorcheteCierre":
-            self.Avanza()
-            if self.token.cat == "PalabraReservada" and self.token.palabra == "DE":
-              self.Avanza()
-              return self.tipo_std()
-            else:
-              self.Error(16, self.token)
-              self.Sincroniza(categorias, reservadas)
-              return False
-          else:
-            self.Error(15, self.token)
-            self.Sincroniza(categorias, reservadas)
-            return False
-        else:
-          self.Error(14, self.token)
-          self.Sincroniza(categorias, reservadas)
-          return False
+      if self.token.cat == "Numero":
+        self.Avanza()
+      else:
+        self.Error(14, self.token)
+        categoriasLocal = categorias[:] + ["CorcheteCierre"]
+        reservadasLocal = reservadas[:] + []
+        self.Sincroniza(categoriasLocal, reservadasLocal, "Numero", None)
+        if self.token.cat == "PuntoComa":
+          return
+          
+      if self.token.cat == "CorcheteCierre":
+        self.Avanza()
+      else:
+        self.Error(15, self.token)
+        categoriasLocal = categorias[:] + []
+        reservadasLocal = reservadas[:] + ["DE"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "CorcheteCierre", None)
+        if self.token.cat == "PuntoComa":
+          return
+        
+      if self.token.cat == "PalabraReservada" and self.token.palabra == "DE":
+        self.Avanza()
+      else:
+        self.Error(16, self.token)
+        categoriasLocal = categorias[:] + []
+        reservadasLocal = reservadas[:] + ["ENTERO", "REAL", "BOOLEANO"]
+        self.Sincroniza(categoriasLocal, reservadasLocal, "PalabraReservada", "DE")
+        if self.token.cat == "PuntoComa":
+          return
       
-
+      self.tipo_std()
 
     else:
       self.Error(10, self.token)
