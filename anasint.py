@@ -983,7 +983,7 @@ class Sintactico:
 
     # No se ha encontrado ningún primero ni siguientes, sincronizacion
     else:
-      #self.Error(31, self.token)
+      self.Error(31, self.tokenAnterior)
       categoriasLocal = categorias[:] + ["OpMultiplicacion"]
       reservadasLocal = reservadas[:] + ["Y"]
       self.Sincroniza(categoriasLocal, reservadasLocal, None, None)

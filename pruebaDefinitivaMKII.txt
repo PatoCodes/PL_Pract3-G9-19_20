@@ -1,8 +1,10 @@
-PROGRAMA p1 //COMENTARIO DE PRUEBA
-VAR i,x:ENTERO
+PROGRAMA p1; //COMENTARIO DE PRUEBA
+VAR i,x:ENTERO;
 	a,b,c: VECTOR [5] DE BOOLEANO;
+	x,y: REAL;
 INICIO
 	i:=0.00;
+	a[5]:=10;
 	MIENTRAS i[5] = 3.3 + 5 HACER
 		INICIO
 			x:=i/4;
@@ -11,7 +13,7 @@ INICIO
 	SI (1.1 * 2.2) + 3 <> 5.0
 	ENTONCES
 		INICIO
-			LEE(x)
+			LEE(x);
 			id[2] := 6.999;
 		FIN
 	SINO
