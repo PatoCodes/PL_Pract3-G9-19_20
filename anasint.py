@@ -23,8 +23,12 @@ class Sintactico:
     # Booleano global para indicar un final de fichero inesperado. Utilizado para el tratamiento de errores
     self.finFichero = False
 
+    # Token leido previamente. Utilizado para algunos mensajes de error
+    self.tokenAnterior = None
+
   # Wrapper para obtener el siguiente componente léxico
   def Avanza(self):
+    self.tokenAnterior = self.token
     self.token=self.lexico.Analiza()
 
   # Método de sincronización para tratamiento de errores en modo pánico
@@ -159,7 +163,7 @@ class Sintactico:
       if self.token.cat == "PuntoComa":
         self.Avanza()
       else:
-        self.Error(3, self.token)
+        self.Error(3, self.tokenAnterior)
         self.Sincroniza([], ["VAR", "INICIO"], "PuntoComa", None)
         if self.token.cat == "EOF":
           return
@@ -218,7 +222,7 @@ class Sintactico:
       if self.token.cat == "PuntoComa":
         self.Avanza()
       else:
-        self.Error(36, self.token)
+        self.Error(36, self.tokenAnterior)
         categoriasLocal = categorias[:] + ["Identificador"]
         reservadasLocal = reservadas[:] + []
         self.Sincroniza(categoriasLocal, reservadasLocal, "PuntoComa", None)
@@ -268,7 +272,7 @@ class Sintactico:
       if self.token.cat == "PuntoComa":
         self.Avanza()
       else:
-        self.Error(36, self.token)
+        self.Error(36, self.tokenAnterior)
         categoriasLocal = categorias[:] + ["Identificador"]
         reservadasLocal = reservadas[:] + []
         self.Sincroniza(categoriasLocal, reservadasLocal, "PuntoComa", None)
@@ -478,7 +482,7 @@ class Sintactico:
       if self.token.cat == "PuntoComa":
         self.Avanza()
       else:
-        self.Error(37, self.token)
+        self.Error(37, self.tokenAnterior)
         categoriasLocal = categorias[:] + ["Identificador"]
         reservadasLocal = reservadas[:] + ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
         self.Sincroniza(categoriasLocal, reservadasLocal, "PuntoComa", None)
