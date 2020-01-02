@@ -356,7 +356,7 @@ class Sintactico:
             reservadasLocal = reservadas[:] + []
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "Identificador":
-                self.decl_var()
+                self.decl_v()
 
     # No Terminal Lista_Id
     def lista_id(self):
