@@ -5,19 +5,31 @@
 
 tablaSimbolos = {}
 
+# Nombres de identificadores no validos
+PR = frozenset(["PROGRAMA", "VAR", "VECTOR", "DE", "ENTERO", "REAL", "BOOLEANO", "INICIO","PROC","FUNCION",
+                      "FIN", "SI", "ENTONCES", "SINO", "MIENTRAS", "HACER", "LEE", "ESCRIBE", "CIERTO", "FALSO","Y","O","NO" ])
+
 # Metodos:
 
 # añadeSimbolo: intenta añadir un símbolo a la tabla.
-# Devuelve TRUE si se añade con éxito o FALSE si hay un error añadiendolo (el símbolo ya existe)
+# Devuelve TRUE si se añade con éxito o FALSE si hay un error añadiendolo (el símbolo ya existe o es un símbolo no valido)
 def añadeSimbolo(simbolo, tipo):
     
-    if simbolo not in tablaSimbolos:
-        # Añadido con exito
-        tablaSimbolos = {"tipo": tipo}
-        return True
-    # Problema al añadirlo
+    global tablaSimbolos
+
+    # Comprobamos si el simbolo es valido
+    if simbolo.upper() in PR:
+        # Simbolo invalido: error
+        return "invalido"
     else:
-        return False
+        # Si el simbolo es valido, comprobamos si ya existe previamente
+        if simbolo in tablaSimbolos:
+            # Simbolo duplicado: error
+            return "duplicado"
+        else:
+            # Añadido con exito
+            tablaSimbolos = {"tipo": tipo}
+            return True
 
 # actualizaInfo: intenta añadir información a un símbolo de la tabla.
 # Devuelve TRUE si se puede añadir con éxito, o FALSE si hay un error añadiendola (el símbolo no existe)

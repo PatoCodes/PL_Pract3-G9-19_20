@@ -183,7 +183,10 @@ class Sintactico:
             # ERRORES SEMANTICOS (60 - 98)
             elif nerr == 60:  # No se puede repetir el nombre de los componentes
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: La instruccion debe acabar con punto y coma")
+                      "  ERROR: No se pueden repetir identificadores declarados previamente")
+            elif nerr == 61:  # Los identificadores no pueden tener nombre de palabra reservada
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Los identificadores no pueden tomar nombres de palabras reservadas")
 
             # ERROR EOF (99)
             elif nerr == 99:  # Final de fichero inesperado
