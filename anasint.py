@@ -9,6 +9,12 @@ import sys
 from sys import argv
 import errores
 
+# Acceso a la tabla de símbolos
+import tablaSimbolos as ts
+
+# Wrapper para los atributos de los no terminales
+class Atributos:
+  pass
 
 class Sintactico:
     # Constructor de la clase que implementa el Analizador Sintactico
@@ -63,6 +69,8 @@ class Sintactico:
         # Los mensajes de error se imprimen únicamente si no se ha alcanzado un final de fichero inesperado
         self.aceptacion = False
         if not self.finFichero:
+
+            # ERRORES SINTACTICOS (1 - 59)
             if nerr == 1:  # PROGRAMA
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Se esperaba PROGRAMA en la cabecera del programa")
@@ -172,6 +180,12 @@ class Sintactico:
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: La instruccion debe acabar con punto y coma")
 
+            # ERRORES SEMANTICOS (60 - 98)
+            elif nerr == 60:  # No se puede repetir el nombre de los componentes
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: La instruccion debe acabar con punto y coma")
+
+            # ERROR EOF (99)
             elif nerr == 99:  # Final de fichero inesperado
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Final de fichero inesperado")

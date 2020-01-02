@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Acceso a la tabla de símbolos
+import tablaSimbolos as ts
+
 class AST:
 	def __str__(self):
 		return self.arbol()
@@ -7,6 +10,9 @@ class AST:
 	# Metodos estandar a implementar (si es necesario) por los nodos especificos
 	def arbol(self):
 		pass
+
+	# NOTA: Compsem devolverá TRUE si las comprobaciones son correctas y FALSE si se detecta algún error.
+	# Este valor se almacenará en una variable de la clase, "correcto", que se usará para emitir errores.
 	def compsem(self):
 		pass
 
