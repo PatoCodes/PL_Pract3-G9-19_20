@@ -150,3 +150,10 @@ class NodoAccesoVector(AST):
 
 	def arbol(self):
 		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipo, self.linea, self.vect, self.exp)
+
+class Vacio(AST):
+	def __init__(self, linea):
+		self.linea = linea
+
+	def arbol(self):
+		return '( "Vacio (ERROR)" "linea: %s" )' % (self.linea)
