@@ -179,6 +179,9 @@ class Sintactico:
             elif nerr == 37:  # Falta punto y coma en instrucciones
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: La instruccion debe acabar con punto y coma")
+            elif nerr == 38:  # El programa debe tener un identificador
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: El programa debe incluir un identificador para nombrarlo")
 
             # ERRORES SEMANTICOS (60 - 98)
             elif nerr == 60:  # No se puede repetir el nombre de los componentes
@@ -203,9 +206,17 @@ class Sintactico:
             self.Avanza()
 
             if self.token.cat == "Identificador":
+
+                # Comprobacion semantica
+                resultadoVariable = ts.añadeSimbolo(self.token.valor, "programa")
+                if resultadoVariable == "invalido":
+                    self.Error(61, self.tokenAnterior)
+                elif resultadoVariable == "duplicado":
+                    self.Error(60, self.tokenAnterior)
+
                 self.Avanza()
             else:
-                self.Error(2, self.token)
+                self.Error(38, self.token)
                 self.Sincroniza(["PuntoComa"], [], "Identificador", None)
                 if self.token.cat == "EOF":
                     return
