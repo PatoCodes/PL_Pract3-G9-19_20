@@ -103,7 +103,7 @@ class NodoEntero(AST):
 		self.compsem()
 	
 	def arbol(self):
-		return '( "Entero" "valor: %s" "linea: %s" )' % (self.valor, self.linea)
+		return '( "Entero" "valor: %s" "tipo: %s" "linea: %s" )' % (self.valor, self.tipo, self.linea)
 
 
 class NodoReal(AST):
@@ -113,7 +113,7 @@ class NodoReal(AST):
 		self.compsem()
 	
 	def arbol(self):
-		return '( "Real" "valor: %s" "linea: %s" )' % (self.valor, self.linea)
+		return '( "Real" "valor: %s" "tipo: %s" "linea: %s" )' % (self.valor, self.tipo, self.linea)
 
 class NodoBooleano(AST):
 	def __init__(self, valor, linea):
@@ -122,7 +122,7 @@ class NodoBooleano(AST):
 		self.compsem()
 	
 	def arbol(self):
-		return '( "BOOLEANO" "valor: %s" "linea: %s" )' % (self.valor, self.linea)
+		return '( "BOOLEANO" "valor: %s" "tipo: %s" "linea: %s" )' % (self.valor, self.tipo, self.linea)
 
 class NodoAccesoVariable(AST):
 	def __init__(self, var, linea, tipo):
@@ -143,4 +143,4 @@ class NodoAccesoVector(AST):
 		self.compsem()
 
 	def arbol(self):
-		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipoVar, self.linea, self.vect, self.exp)
+		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipo, self.linea, self.vect, self.exp)
