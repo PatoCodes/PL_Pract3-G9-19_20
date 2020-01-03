@@ -208,7 +208,7 @@ class Sintactico:
             if self.token.cat == "Identificador":
 
                 # Comprobacion semantica
-                resultadoVariable = ts.añadeSimbolo(self.token.valor, "programa")
+                resultadoVariable = ts.anadeSimbolo(self.token.valor, "programa")
                 if resultadoVariable == "invalido":
                     self.Error(61, self.tokenAnterior)
                 elif resultadoVariable == "duplicado":
