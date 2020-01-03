@@ -1277,8 +1277,16 @@ if __name__ == "__main__":
     fl = flujo.Flujo(txt)
     anlex = analex.Analex(fl)
     S = Sintactico(anlex)
-    S.Programa()
+
+    # Atributos de programa
+    Programa = Atributos()
+
+    S.Programa(Programa)
     if S.aceptacion:
         print("Analisis sintactico SATISFACTORIO. Fichero :", filename, "CORRECTO")
     else:
         print("Analisis sintactico CON ERRORES. Fichero :", filename, "ERRONEO")
+
+    # Imprime el AST
+    print("\nAST generado:")
+    print(Programa.at["arbol"])

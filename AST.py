@@ -21,6 +21,10 @@ class NodoAsignacion(AST):
 		self.izda = izda
 		self.exp = exp
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+
 		self.compsem()
 
 	def arbol(self):
@@ -32,6 +36,10 @@ class NodoSi(AST):
 		self.si = si
 		self.sino = sino
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+
 		self.compsem()
 
 	def arbol(self):
@@ -42,6 +50,10 @@ class NodoMientras(AST):
 		self.exp = exp
 		self.inst = inst
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
@@ -51,6 +63,10 @@ class NodoLee(AST):
 	def __init__(self,var,linea):
 		self.var = var
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
@@ -60,6 +76,10 @@ class NodoEscribe(AST):
 	def __init__(self, exp, linea):
 		self.exp = exp
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
@@ -69,6 +89,10 @@ class NodoCompuesta(AST):
 	def __init__(self, lsen, linea):
 		self.lsen = lsen
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
@@ -85,6 +109,10 @@ class NodoComparacion(AST):
 		self.linea = linea
 		self.op = op
 		self.tipo = "Booleano"
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
@@ -97,6 +125,10 @@ class NodoAritmetico(AST):
 		self.linea = linea
 		self.op = op
 		self.tipo = "Real"
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
@@ -106,6 +138,10 @@ class NodoEntero(AST):
 	def __init__(self, valor, linea):
 		self.valor = valor
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 	
 	def arbol(self):
@@ -116,6 +152,10 @@ class NodoReal(AST):
 	def __init__(self, valor, linea):
 		self.valor = valor
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 	
 	def arbol(self):
@@ -125,6 +165,10 @@ class NodoBooleano(AST):
 	def __init__(self, valor, linea):
 		self.valor = valor
 		self.linea = linea
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 	
 	def arbol(self):
@@ -135,6 +179,10 @@ class NodoAccesoVariable(AST):
 		self.var = var
 		self.linea = linea
 		self.tipo = tipo
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
@@ -146,50 +194,66 @@ class NodoAccesoVector(AST):
 		self.exp = exp
 		self.linea = linea
 		self.tipoVar = tipo
+
+		# Errores
+		self. errores = []
+		
 		self.compsem()
 
 	def arbol(self):
 		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipoVar, self.linea, self.vect, self.exp)
 
 
-## CLASES INVENTADAS
+## Nodos añadidos
 
 class NodoSigno(AST):
-    def __init__(self, signo, term, linea):
-        self.signo = signo
-        self.term = term
-        self.linea = linea
-        self.compsem()
+	def __init__(self, signo, term, linea):
+		self.signo = signo
+		self.term = term
+		self.linea = linea
+
+		# Errores
+		self. errores = []
+
+		self.compsem()
         
-    def arbol(self):
-        return '( "Signo" "tipo: %s" "linea: %s" \n %s\n)' % (self.signo, self.linea, self.term)
+	def arbol(self):
+		return '( "Signo" "valor: %s" "linea: %s" \n %s\n)' % (self.signo, self.linea, self.term)
 
 
 class NodoLogico(AST):
-    def __init__(self, izq, dcha, linea, op):
-        self.izq = izq
-        self.dcha = dcha
-        self.linea = linea
-        self.op = op
-        self.tipo = "Booleano"
-        self.compsem()
+	def __init__(self, izq, dcha, linea, op):
+		self.izq = izq
+		self.dcha = dcha
+		self.linea = linea
+		self.op = op
+		self.tipo = "Booleano"
+
+		# Errores
+		self. errores = []
+
+		self.compsem()
     
-    def arbol(self):
-        return '( "Logica" "op: %s" "tipo: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.tipo, self.linea, self.izq, self.dcha)
+	def arbol(self):
+		return '( "Logica" "op: %s" "tipo: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.tipo, self.linea, self.izq, self.dcha)
 
 
 class NodoNo(AST):
-    def __init__(self, fact, linea):
-        self.fact = fact
-        self.linea = linea
-        self.compsem()
-    
-    def arbol(self):
-        return '( "No" "linea: %s" \n %s\n)' % (self.linea, self.fact)
+	def __init__(self, fact, linea):
+		self.fact = fact
+		self.linea = linea
+
+		# Errores
+		self. errores = []
+
+		self.compsem()
+
+	def arbol(self):
+		return '( "No" "linea: %s" \n %s\n)' % (self.linea, self.fact)
 
 
 
-class Vacio(AST):
+class NodoVacio(AST):
 	def __init__(self, linea):
 		self.linea = linea
 
