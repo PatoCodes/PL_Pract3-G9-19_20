@@ -13,7 +13,7 @@ PR = frozenset(["PROGRAMA", "VAR", "VECTOR", "DE", "ENTERO", "REAL", "BOOLEANO",
 
 # añadeSimbolo: intenta añadir un símbolo a la tabla.
 # Devuelve TRUE si se añade con éxito o FALSE si hay un error añadiendolo (el símbolo ya existe o es un símbolo no valido)
-def añadeSimbolo(simbolo, tipo):
+def anadeSimbolo(simbolo, tipo):
     
     global tablaSimbolos
 
