@@ -84,7 +84,7 @@ class NodoComparacion(AST):
 		self.dcha = dcha
 		self.linea = linea
 		self.op = op
-		self.tipo = None
+		self.tipo = "Booleano"
 		self.compsem()
 
 	def arbol(self):
@@ -96,7 +96,7 @@ class NodoAritmetico(AST):
 		self.dcha = dcha
 		self.linea = linea
 		self.op = op
-		self.tipo = None
+		self.tipo = "Real"
 		self.compsem()
 
 	def arbol(self):
@@ -155,30 +155,34 @@ class NodoAccesoVector(AST):
 ## CLASES INVENTADAS
 
 class NodoSigno(AST):
-	def __init__(self, signo, term, linea):
-		self.signo = signo
-		self.term = term
-		self.linea = linea
-	
-	def arbol(self):
-		return '( "Signo" "tipo: %s" "linea: %s" \n %s\n)' % (self.signo, self.linea, self.term)
+    def __init__(self, signo, term, linea):
+        self.signo = signo
+        self.term = term
+        self.linea = linea
+        self.compsem()
+        
+    def arbol(self):
+        return '( "Signo" "tipo: %s" "linea: %s" \n %s\n)' % (self.signo, self.linea, self.term)
 
 
 class NodoLogico(AST):
-    def __init__(self, izq, op, dcha, linea):
+    def __init__(self, izq, dcha, linea, op):
         self.izq = izq
-        self.op = op
         self.dcha = dcha
         self.linea = linea
+        self.op = op
+        self.tipo = "Booleano"
+        self.compsem()
     
     def arbol(self):
-        return '( "Logica" "op: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.linea, self.izq, self.dcha)
+        return '( "Logica" "op: %s" "tipo: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.tipo, self.linea, self.izq, self.dcha)
 
 
 class NodoNo(AST):
     def __init__(self, fact, linea):
         self.fact = fact
         self.linea = linea
+        self.compsem()
     
     def arbol(self):
         return '( "No" "linea: %s" \n %s\n)' % (self.linea, self.fact)
