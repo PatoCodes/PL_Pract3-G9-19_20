@@ -14,8 +14,8 @@ import tablaSimbolos as ts
 
 # Wrapper para los atributos de los no terminales
 class Atributos:
-  pass
-
+  at = {}
+  
 class Sintactico:
     # Constructor de la clase que implementa el Analizador Sintactico
     # Solicita el primer compnente lexico
@@ -65,7 +65,7 @@ class Sintactico:
 
     # Funcion que muestra los mensajes de error
 
-    def Error(self, nerr, tok):
+    def Error(self, nerr, tok, **opcional):
         # Los mensajes de error se imprimen únicamente si no se ha alcanzado un final de fichero inesperado
         self.aceptacion = False
         if not self.finFichero:
@@ -88,7 +88,7 @@ class Sintactico:
                       "  ERROR: Componentes inesperados tras el final del programa")
             elif nerr == 6:  # decl_var
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: Se esperaba una delaración de variable o una declaración de instrucciones")
+                      "  ERROR: Se esperaba una declaración de variable o una declaración de instrucciones")
             elif nerr == 7:  # :
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Se esperaba ':' para declaración de tipo")
@@ -110,7 +110,7 @@ class Sintactico:
                 print("Linea: " + str(tok.linea) + "  ERROR: Se esperaba '['")
             elif nerr == 14:  # Número para índice
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: Se esperaba un numero como indice")
+                      "  ERROR: Se esperaba un numero valido como indice")
             elif nerr == 15:  # Cierre corchete
                 print("Linea: " + str(tok.linea) + "  ERROR: Se esperaba ']'")
             elif nerr == 16:  # DE
@@ -186,10 +186,16 @@ class Sintactico:
             # ERRORES SEMANTICOS (60 - 98)
             elif nerr == 60:  # No se puede repetir el nombre de los componentes
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: No se pueden repetir identificadores declarados previamente")
+                      "  ERROR: El identificador " + str(opcional["id"]) + " ya ha sido declarado previamente")
             elif nerr == 61:  # Los identificadores no pueden tener nombre de palabra reservada
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: Los identificadores no pueden tomar nombres de palabras reservadas")
+                      "  ERROR: El identificador " + str(opcional["id"]) + " esta tomando un valor prohibido (los identificadores no pueden tomar valores de palabras reservadas)")
+            elif nerr == 62:  # Los indices de un vector deben ser numeros enteros
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: El tamaño del vector debe ser un numero entero")
+            elif nerr == 63:  # Los vectores no pueden tener tamaño negativo
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: El tamaño del vector no puede ser cero")
 
             # ERROR EOF (99)
             elif nerr == 99:  # Final de fichero inesperado
@@ -207,12 +213,14 @@ class Sintactico:
 
             if self.token.cat == "Identificador":
 
-                # Comprobacion semantica
-                resultadoVariable = ts.anadeSimbolo(self.token.valor, "programa")
+                # Comprobacion semantica (nombre del identificador)
+                resultadoVariable = ts.añadeSimbolo(self.token.valor, "programa")
                 if resultadoVariable == "invalido":
                     self.Error(61, self.tokenAnterior)
                 elif resultadoVariable == "duplicado":
                     self.Error(60, self.tokenAnterior)
+                else:
+                    ts.actualizaInfo(self.token.valor, "clase", "programa")
 
                 self.Avanza()
             else:
@@ -261,11 +269,16 @@ class Sintactico:
         categorias = []
         reservadas = ["INICIO"]
 
+        # Atributos de los no terminales
+        Lista_id = Atributos()
+        Tipo = Atributos()
+
         # <decl_var> -> VAR <lista_id> : <tipo> ; <decl_v>
         if self.token.cat == "PalabraReservada" and self.token.palabra == "VAR":
+
             self.Avanza()
 
-            self.lista_id()
+            self.lista_id(Lista_id)
 
             if self.token.cat == "DosPuntos":
                 self.Avanza()
@@ -279,7 +292,7 @@ class Sintactico:
                 if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
                     return
 
-            self.tipo()
+            self.tipo(Tipo)
 
             if self.token.cat == "PuntoComa":
                 self.Avanza()
@@ -291,6 +304,21 @@ class Sintactico:
                                 reservadasLocal, "PuntoComa", None)
                 if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
                     return
+
+            # Comprobaciones semanticas (declaraciones de las variables)
+
+            for v in Lista_id.at["lista"]:
+                # Comprobacion semantica (nombre del identificador)
+                resultadoVariable = ts.añadeSimbolo(v, Tipo.at["t"])
+                if resultadoVariable == "invalido":
+                    self.Error(61, self.tokenAnterior, id = v)
+                elif resultadoVariable == "duplicado":
+                    self.Error(60, self.tokenAnterior, id = v)
+                else:
+                    ts.actualizaInfo(v, "clase", Tipo.at["clase"])
+                    # Si es un vector, se añade el tamaño
+                    if Tipo.at["clase"] == "vector":
+                        ts.actualizaInfo(v, "longitud", Tipo.at["longitud"])
 
             self.decl_v()
 
@@ -314,9 +342,13 @@ class Sintactico:
         categorias = []
         reservadas = ["INICIO"]
 
+        # Atributos de los no terminales
+        Lista_id = Atributos()
+        Tipo = Atributos()
+
         if self.token.cat == "Identificador":
             # <decl_v> → <lista_id> : <tipo> ; <decl_v>
-            self.lista_id()
+            self.lista_id(Lista_id)
 
             if self.token.cat == "DosPuntos":
                 self.Avanza()
@@ -330,7 +362,7 @@ class Sintactico:
                 if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
                     return
 
-            self.tipo()
+            self.tipo(Tipo)
 
             if self.token.cat == "PuntoComa":
                 self.Avanza()
@@ -342,6 +374,20 @@ class Sintactico:
                                 reservadasLocal, "PuntoComa", None)
                 if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
                     return
+
+            # Comprobaciones semanticas (declaraciones de las variables)
+            for v in Lista_id.at["lista"]:
+                # Comprobacion semantica (nombre del identificador)
+                resultadoVariable = ts.añadeSimbolo(v, Tipo.at["t"])
+                if resultadoVariable == "invalido":
+                    self.Error(61, self.tokenAnterior, id = v)
+                elif resultadoVariable == "duplicado":
+                    self.Error(60, self.tokenAnterior, id = v)
+                else:
+                    ts.actualizaInfo(v, "clase", Tipo.at["clase"])
+                    # Si es un vector, se añade el tamaño
+                    if Tipo.at["clase"] == "vector":
+                        ts.actualizaInfo(v, "longitud", Tipo.at["longitud"])
 
             self.decl_v()
 
@@ -359,17 +405,27 @@ class Sintactico:
                 self.decl_v()
 
     # No Terminal Lista_Id
-    def lista_id(self):
+    def lista_id(self, Lista_id):
 
         # Siguientes y palabras reservadas
         categorias = ["DosPuntos"]
         reservadas = []
 
+        # Atributos de los no terminales
+        Resto_listaid = Atributos()
+
         # <lista_id> → id <resto_listaid>
         if self.token.cat == "Identificador":
+
+            # Comprobaciones semanticas
+            id = self.token.valor
+
             self.Avanza()
 
-            self.resto_listaid()
+            self.resto_listaid(Resto_listaid)
+
+            # Comprobaciones semanticas
+            Lista_id.at["lista"] = [id] + Resto_listaid.at["lista"]
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
@@ -378,23 +434,36 @@ class Sintactico:
             reservadasLocal = reservadas[:] + []
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "Identificador":
-                self.lista_id()
+                self.lista_id(Lista_id)
 
     # No Terminal Resto_Listaid
-    def resto_listaid(self):
+    def resto_listaid(self, Resto_listaid):
 
         # Siguientes y palabras reservadas
         categorias = ["DosPuntos"]
         reservadas = []
 
+        # Atributos de los no terminales
+        Lista_id = Atributos()
+
         # <resto_listaid> →  , <lista_id>
         if self.token.cat == "Coma":
             self.Avanza()
 
-            self.lista_id()
+            self.lista_id(Lista_id)
+
+            # Comprobaciones semanticas
+            if "lista" in Lista_id.at:
+                Resto_listaid.at["lista"] = Lista_id.at["lista"]
+            else:
+                Resto_listaid.at["lista"] = []
 
         # Siguientes
         elif self.token.cat == "DosPuntos":
+
+            # Comprobaciones semanticas
+            Resto_listaid.at["lista"] = []
+
             return
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
@@ -404,10 +473,10 @@ class Sintactico:
             reservadasLocal = reservadas[:] + []
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "Coma":
-                self.resto_listaid()
+                self.resto_listaid(Resto_listaid)
 
     # No Terminal Tipo
-    def tipo(self):
+    def tipo(self, Tipo):
 
         # Siguientes y palabras reservadas
         categorias = ["PuntoComa"]
@@ -415,10 +484,23 @@ class Sintactico:
 
         # <Tipo> → <tipo_std>
         if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
-            self.tipo_std()
+
+            # Atributos de los no terminales
+            Tipo_std = Atributos()
+
+            self.tipo_std(Tipo_std)
+
+            # Comprobaciones semanticas
+            Tipo.at["t"] = Tipo_std.at["t"]
+            Tipo.at["clase"] = "variable"
+            Tipo.at["longitud"] = 0
 
         # <Tipo> → VECTOR [num] DE <Tipo_std>
         elif self.token.cat == "PalabraReservada" and self.token.palabra == "VECTOR":
+
+            # Atributos de los no terminales
+            Tipo_std = Atributos()
+
             self.Avanza()
 
             if self.token.cat == "CorcheteApertura":
@@ -433,6 +515,20 @@ class Sintactico:
                     return
 
             if self.token.cat == "Numero":
+
+                # Comprobaciones semanticas
+
+                # El tamaño del vector debe ser entero
+                if self.token.tipo != "int":
+                    self.Error(62, self.token)
+                    Tipo.at["longitud"] = int(self.token.numero)
+                else:
+                    Tipo.at["longitud"] = self.token.numero
+
+                # El tamaño del vector no debe ser cero (se trata posteriormente)
+                if self.token.numero == 0:
+                    self.Error(63, self.token)
+
                 self.Avanza()
             else:
                 self.Error(14, self.token)
@@ -466,7 +562,11 @@ class Sintactico:
                 if self.token.cat == "PuntoComa":
                     return
 
-            self.tipo_std()
+            self.tipo_std(Tipo)
+
+            # Comprobaciones semanticas
+            Tipo.at["t"] = Tipo_std.at["t"]
+            Tipo.at["clase"] = "vector"
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
@@ -476,10 +576,10 @@ class Sintactico:
                 ["VECTOR", "ENTERO", "REAL", "BOOLEANO"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat in ["VECTOR", "ENTERO", "REAL", "BOOLEANO"]:
-                self.tipo()
+                self.tipo(Tipo)
 
     # No Terminal Tipo_Std
-    def tipo_std(self):
+    def tipo_std(self, Tipo_std):
 
         # Siguientes y palabras reservadas
         categorias = ["PuntoComa"]
@@ -489,6 +589,15 @@ class Sintactico:
             # <Tipo_std> → ENTERO
             # <Tipo_std> → REAL
             # <Tipo_std> → BOOLEANO
+
+            # Comprobaciones semanticas
+            if self.token.palabra == "ENTERO":
+                Tipo_std.at["t"] = "entero"
+            elif self.token.palabra == "REAL":
+                Tipo_std.at["t"] = "real"
+            else:
+                Tipo_std.at["t"] = "booleano"
+
             self.Avanza()
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -498,7 +607,7 @@ class Sintactico:
             reservadasLocal = reservadas[:] + ["ENTERO, REAL, BOOLEANO"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
-                self.tipo_std()
+                self.tipo_std(Tipo_std)
 
     # No Terminal Instrucciones
     def instrucciones(self):
