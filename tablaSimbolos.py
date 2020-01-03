@@ -28,7 +28,8 @@ def añadeSimbolo(simbolo, tipo):
             return "duplicado"
         else:
             # Añadido con exito
-            tablaSimbolos = {"tipo": tipo}
+            tablaSimbolos[simbolo] = {}
+            tablaSimbolos[simbolo]["tipo"] = tipo
             return True
 
 # actualizaInfo: intenta añadir información a un símbolo de la tabla.
