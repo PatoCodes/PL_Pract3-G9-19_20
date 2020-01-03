@@ -12,6 +12,9 @@ import errores
 # Acceso a la tabla de símbolos
 import tablaSimbolos as ts
 
+# AST
+import AST as ast
+
 # Wrapper para los atributos de los no terminales
 class Atributos:
   at = {}
@@ -207,6 +210,9 @@ class Sintactico:
     # No Terminal Programa
     def Programa(self):
 
+        # Atributos de los no terminales
+        arb = Atributos()
+
         # <Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
         if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
             self.Avanza()
@@ -214,7 +220,7 @@ class Sintactico:
             if self.token.cat == "Identificador":
 
                 # Comprobacion semantica (nombre del identificador)
-                resultadoVariable = ts.añadeSimbolo(self.token.valor, "programa")
+                resultadoVariable = ts.anadeSimbolo(self.token.valor, "programa")
                 if resultadoVariable == "invalido":
                     self.Error(61, self.tokenAnterior)
                 elif resultadoVariable == "duplicado":
@@ -309,7 +315,7 @@ class Sintactico:
 
             for v in Lista_id.at["lista"]:
                 # Comprobacion semantica (nombre del identificador)
-                resultadoVariable = ts.añadeSimbolo(v, Tipo.at["t"])
+                resultadoVariable = ts.anadeSimbolo(v, Tipo.at["t"])
                 if resultadoVariable == "invalido":
                     self.Error(61, self.tokenAnterior, id = v)
                 elif resultadoVariable == "duplicado":
@@ -378,7 +384,7 @@ class Sintactico:
             # Comprobaciones semanticas (declaraciones de las variables)
             for v in Lista_id.at["lista"]:
                 # Comprobacion semantica (nombre del identificador)
-                resultadoVariable = ts.añadeSimbolo(v, Tipo.at["t"])
+                resultadoVariable = ts.anadeSimbolo(v, Tipo.at["t"])
                 if resultadoVariable == "invalido":
                     self.Error(61, self.tokenAnterior, id = v)
                 elif resultadoVariable == "duplicado":

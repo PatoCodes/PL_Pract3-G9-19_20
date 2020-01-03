@@ -84,7 +84,7 @@ class NodoComparacion(AST):
 		self.dcha = dcha
 		self.linea = linea
 		self.op = op
-		self.tipo = None
+		self.tipo = "Booleano"
 		self.compsem()
 
 	def arbol(self):
@@ -96,7 +96,7 @@ class NodoAritmetico(AST):
 		self.dcha = dcha
 		self.linea = linea
 		self.op = op
-		self.tipo = None
+		self.tipo = "Real"
 		self.compsem()
 
 	def arbol(self):
@@ -109,7 +109,7 @@ class NodoEntero(AST):
 		self.compsem()
 	
 	def arbol(self):
-		return '( "Entero" "valor: %s" "tipo: %s" "linea: %s" )' % (self.valor, self.tipo, self.linea)
+		return '( "Entero" "valor: %s" "linea: %s" )' % (self.valor, self.linea)
 
 
 class NodoReal(AST):
@@ -119,7 +119,7 @@ class NodoReal(AST):
 		self.compsem()
 	
 	def arbol(self):
-		return '( "Real" "valor: %s" "tipo: %s" "linea: %s" )' % (self.valor, self.tipo, self.linea)
+		return '( "Real" "valor: %s" "linea: %s" )' % (self.valor, self.linea)
 
 class NodoBooleano(AST):
 	def __init__(self, valor, linea):
@@ -128,7 +128,7 @@ class NodoBooleano(AST):
 		self.compsem()
 	
 	def arbol(self):
-		return '( "BOOLEANO" "valor: %s" "tipo: %s" "linea: %s" )' % (self.valor, self.tipo, self.linea)
+		return '( "BOOLEANO" "valor: %s" "linea: %s" )' % (self.valor, self.linea)
 
 class NodoAccesoVariable(AST):
 	def __init__(self, var, linea, tipo):
@@ -149,7 +149,45 @@ class NodoAccesoVector(AST):
 		self.compsem()
 
 	def arbol(self):
-		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipo, self.linea, self.vect, self.exp)
+		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipoVar, self.linea, self.vect, self.exp)
+
+
+## CLASES INVENTADAS
+
+class NodoSigno(AST):
+    def __init__(self, signo, term, linea):
+        self.signo = signo
+        self.term = term
+        self.linea = linea
+        self.compsem()
+        
+    def arbol(self):
+        return '( "Signo" "tipo: %s" "linea: %s" \n %s\n)' % (self.signo, self.linea, self.term)
+
+
+class NodoLogico(AST):
+    def __init__(self, izq, dcha, linea, op):
+        self.izq = izq
+        self.dcha = dcha
+        self.linea = linea
+        self.op = op
+        self.tipo = "Booleano"
+        self.compsem()
+    
+    def arbol(self):
+        return '( "Logica" "op: %s" "tipo: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.tipo, self.linea, self.izq, self.dcha)
+
+
+class NodoNo(AST):
+    def __init__(self, fact, linea):
+        self.fact = fact
+        self.linea = linea
+        self.compsem()
+    
+    def arbol(self):
+        return '( "No" "linea: %s" \n %s\n)' % (self.linea, self.fact)
+
+
 
 class Vacio(AST):
 	def __init__(self, linea):
