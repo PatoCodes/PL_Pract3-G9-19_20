@@ -8,6 +8,7 @@ import analex
 import sys
 from sys import argv
 import errores
+import copy
 
 # Acceso a la tabla de símbolos
 import tablaSimbolos as ts
@@ -208,10 +209,16 @@ class Sintactico:
                 self.finFichero = True
 
     # No Terminal Programa
-    def Programa(self):
+    def Programa(self, Programa):
 
         # Atributos de los no terminales
-        arb = Atributos()
+        Instrucciones = Atributos()
+
+        # Arbol (por defecto asumimos arbol con error)
+        Programa.at["arbol"] = ast.NodoVacio(1)
+
+        # Variable para comprobar errores durante la construccion (de cara a generar el arbol)
+        error = False
 
         # <Programa> -> PROGRAMA id; <decl_var> <instrucciones>.
         if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
@@ -223,13 +230,16 @@ class Sintactico:
                 resultadoVariable = ts.anadeSimbolo(self.token.valor, "programa")
                 if resultadoVariable == "invalido":
                     self.Error(61, self.tokenAnterior)
+                    error = True
                 elif resultadoVariable == "duplicado":
                     self.Error(60, self.tokenAnterior)
+                    error = True
                 else:
                     ts.actualizaInfo(self.token.valor, "clase", "programa")
 
                 self.Avanza()
             else:
+                error = True
                 self.Error(38, self.token)
                 self.Sincroniza(["PuntoComa"], [], "Identificador", None)
                 if self.token.cat == "EOF":
@@ -238,6 +248,7 @@ class Sintactico:
             if self.token.cat == "PuntoComa":
                 self.Avanza()
             else:
+                error = True
                 self.Error(3, self.tokenAnterior)
                 self.Sincroniza([], ["VAR", "INICIO"], "PuntoComa", None)
                 if self.token.cat == "EOF":
@@ -245,10 +256,16 @@ class Sintactico:
 
             self.decl_var()
 
-            self.instrucciones()
+            self.instrucciones(Instrucciones)
 
             if self.token.cat == "Punto":
                 # FINAL DE FICHERO
+
+                # Comprobamos errores en la produccion
+                if not error:
+                    # Produccion analizada correctamente, se genera el arbol
+                    Programa.at["arbol"] = Instrucciones.at["arbol"]
+
                 self.Avanza()
             else:
                 self.Error(4, self.token)
@@ -256,9 +273,7 @@ class Sintactico:
                 if self.token.cat == "EOF":
                     return
 
-            if self.token.cat == "EOF":
-                return
-            else:
+            if self.token.cat != "EOF":
                 self.Error(5, self.token)
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -266,7 +281,7 @@ class Sintactico:
             self.Error(1, self.token)
             self.Sincroniza(["Identificador"], [], None, None)
             if self.token.cat == "PalabraReservada" and self.token.palabra == "PROGRAMA":
-                self.Programa()
+                self.Programa(copy.deepcopy(Programa))
 
     # No Terminal Decl_Var
     def decl_var(self):
@@ -616,19 +631,30 @@ class Sintactico:
                 self.tipo_std(Tipo_std)
 
     # No Terminal Instrucciones
-    def instrucciones(self):
+    def instrucciones(self, Instrucciones):
 
         # Siguientes y palabras reservadas
         categorias = ["Punto"]
         reservadas = []
 
+        # Atributos de los no terminales
+        Lista_inst = Atributos()
+
+        # Construccion del arbol
+        Instrucciones.at["arbol"] = ast.NodoVacio(self.token.linea)
+        linea = self.token.linea
+
         # <instrucciones> → INICIO <lista_inst> FIN
         if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+
             self.Avanza()
 
-            self.lista_inst()
+            self.lista_inst(Lista_inst)
 
             if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+
+                # Analisis correcto, creacion del arbol
+                Instrucciones.at["arbol"] = ast.NodoCompuesta(Lista_inst.at["lista"], linea)
                 self.Avanza()
             else:
                 self.Error(12, self.token)
@@ -646,22 +672,32 @@ class Sintactico:
             reservadasLocal = reservadas[:] + ["INICIO"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
-                self.instrucciones()
+                self.instrucciones(copy.deepcopy(Instrucciones))
 
     # No Terminal Lista_Inst
-    def lista_inst(self):
+    def lista_inst(self, Lista_inst):
 
         # Siguientes y palabras reservadas
         categorias = []
         reservadas = ["FIN"]
 
+        # Atributos de los no terminales
+        Instruccion = Atributos()
+        Lista_Inst1 = Atributos()
+
+        # Construccion del arbol
+        Lista_inst.at["lista"] = [ast.NodoVacio(self.token.linea)]
+        error = False
+
         # <lista_inst> → <instrucción> ; <lista_inst>
         if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
-            self.instruccion()
+
+            self.instruccion(Instruccion)
 
             if self.token.cat == "PuntoComa":
                 self.Avanza()
             else:
+                error = True
                 self.Error(37, self.tokenAnterior)
                 categoriasLocal = categorias[:] + ["Identificador"]
                 reservadasLocal = reservadas[:] + \
@@ -671,10 +707,18 @@ class Sintactico:
                 if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
                     return
 
-            self.lista_inst()
+            self.lista_inst(Lista_Inst1)
+
+            # Comprobamos errores
+            if not error:
+                # Analisis con exito, construccion del arbol
+                Lista_inst.at["lista"] = [Instruccion.at["arbol"]] + Lista_Inst1.at["lista"]
 
         # Siguientes
         elif self.token.cat == "PalabraReservada" and self.token.palabra in reservadas:
+
+            # Construccion del arbol
+            Lista_inst.at["lista"] = []
             return
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
@@ -685,22 +729,35 @@ class Sintactico:
                 ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
-                self.lista_inst()
+                self.lista_inst(copy.deepcopy(Lista_inst))
 
     # No Terminal Instruccion
-    def instruccion(self):
+    def instruccion(self, Instruccion):
 
         # Siguientes y palabras reservadas
         categorias = ["PuntoComa"]
         reservadas = ["SINO"]
 
+        # Construccion del arbol
+        Instruccion.at["arbol"] = ast.NodoVacio(self.token.linea)
+        linea = self.token.linea
+        error = False
+
         # <instrucción> → INICIO <lista_inst> FIN
         if self.token.cat == "PalabraReservada" and self.token.palabra == "INICIO":
+
+            # Atributos de los no terminales
+            Lista_inst = Atributos()
+
             self.Avanza()
 
-            self.lista_inst()
+            self.lista_inst(Lista_inst)
 
             if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
+
+                # Construccion del arbol
+                Instruccion.at["arbol"] = ast.NodoCompuesta(Lista_inst.at["lista"], linea)
+
                 self.Avanza()
             else:
                 self.Error(12, self.token)
@@ -713,22 +770,42 @@ class Sintactico:
 
         # <instrucción> → <inst_simple>
         elif self.token.cat == "Identificador":
-            self.inst_simple()
+
+            # Atributos de los no terminales
+            Inst_simple = Atributos()
+
+            self.inst_simple(Inst_simple)
+
+            # Construccion del arbol
+            Instruccion.at["arbol"] = Inst_simple.at["arbol"]
 
         # <instrucción> → <inst_es>
         elif self.token.cat == "PalabraReservada" and self.token.palabra in ["LEE", "ESCRIBE"]:
 
-            self.inst_es()
+            # Atributos de los no terminales
+            Inst_es = Atributos()
+
+            self.inst_es(Inst_es)
+
+            # Construccion del arbol
+            Instruccion.at["arbol"] = Inst_es.at["arbol"]
 
         # <instrucción> →  SI <expresion> ENTONCES <instrucción> SINO <instrucción>
         elif self.token.cat == "PalabraReservada" and self.token.palabra == "SI":
+
+            # Atributos de los no terminales
+            Expresion = Atributos()
+            Instruccion1 = Atributos()
+            Instruccion2 = Atributos()
+
             self.Avanza()
 
-            self.expresion()
+            self.expresion(Expresion)
 
             if self.token.cat == "PalabraReservada" and self.token.palabra == "ENTONCES":
                 self.Avanza()
             else:
+                error = True
                 self.Error(18, self.token)
                 categoriasLocal = categorias[:] + ["Identificador"]
                 reservadasLocal = reservadas[:] + \
@@ -738,11 +815,12 @@ class Sintactico:
                 if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
                     return
 
-            self.instruccion()
+            self.instruccion(Instruccion1)
 
             if self.token.cat == "PalabraReservada" and self.token.palabra == "SINO":
                 self.Avanza()
             else:
+                error = True
                 self.Error(21, self.token)
                 categoriasLocal = categorias[:] + ["Identificador"]
                 reservadasLocal = reservadas[:] + \
@@ -752,17 +830,27 @@ class Sintactico:
                 if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
                     return
 
-            self.instruccion()
+            self.instruccion(Instruccion2)
+
+            # Construccion del arbol
+            if not error:
+                Instruccion.at["arbol"] = ast.NodoSi(Expresion.at["arbol"], Instruccion1.at["arbol"], Instruccion2.at["arbol"], linea)
 
         # <instrucción> → MIENTRAS <expresión> HACER <instrucción>
         elif self.token.cat == "PalabraReservada" and self.token.palabra == "MIENTRAS":
+
+            # Atributos de los no terminales
+            Expresion = Atributos()
+            Instruccion1 = Atributos()
+
             self.Avanza()
 
-            self.expresion()
+            self.expresion(Expresion)
 
             if self.token.cat == "PalabraReservada" and self.token.palabra == "HACER":
                 self.Avanza()
             else:
+                error = True
                 self.Error(34, self.token)
                 categoriasLocal = categorias[:] + ["Identificador"]
                 reservadasLocal = reservadas[:] + \
@@ -772,7 +860,11 @@ class Sintactico:
                 if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
                     return
 
-            self.instruccion()
+            self.instruccion(Instruccion1)
+
+            # Construccion del arbol
+            if not error:
+                Instruccion.at["arbol"] = ast.NodoMientras(Expresion.at["arbol"], Instruccion1.at["arbol"], linea)
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
@@ -782,20 +874,34 @@ class Sintactico:
                 ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
-                self.instruccion()
+                self.instruccion(copy.deepcopy(Instruccion))
 
     # No Terminal Inst_Simple
-    def inst_simple(self):
+    def inst_simple(self, Inst_simple):
 
         # Siguientes y palabras reservadas
         categorias = ["PuntoComa"]
         reservadas = ["SINO"]
 
+        # Atributos de los no terminales
+        Resto_instsimple = Atributos()
+
+        # Construccion del arbol
+        Inst_simple.at["arbol"] = ast.NodoVacio(self.token.linea)
+
+
         if self.token.cat == "Identificador":
             # <inst_simple> -> id <resto_instsimple>
+
+            # Atributos de los no terminales
+            Resto_instsimple.at["h"] = self.token
+
             self.Avanza()
 
-            self.resto_instsimple()
+            self.resto_instsimple(Resto_instsimple)
+
+            # Construccion del arbol
+            Inst_simple.at["arbol"] = Resto_instsimple.at["arbol"]
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
@@ -804,30 +910,55 @@ class Sintactico:
             reservadasLocal = reservadas[:]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "Identificador":
-                self.inst_simple()
+                self.inst_simple(copy.deepcopy(Inst_simple))
 
     # No Terminal Resto_Instsimple
-    def resto_instsimple(self):
+    def resto_instsimple(self, Resto_instsimple):
 
         # Siguientes y palabras reservadas
         categorias = ["PuntoComa"]
         reservadas = ["SINO"]
 
+        # Construccion del arbol
+        Resto_instsimple.at["arbol"] = ast.NodoVacio(self.token.linea)
+        linea = self.token.linea
+        error = False
+
         if self.token.cat == "OpAsigna":
             # <resto_instsimple> -> opasigna <expresion>
+
+            # Atributos de los no terminales
+            Expresion = Atributos()
+
             self.Avanza()
 
-            self.expresion()
+            self.expresion(Expresion)
+
+            # Construccion del arbol
+            variable = ast.NodoAccesoVariable(Resto_instsimple.at["h"].valor, Resto_instsimple.at["h"].linea)
+
+            #TODO Comprobaciones semanticas de variable
+
+            Resto_instsimple.at["arbol"] = ast.NodoAsignacion(variable, Expresion.at["arbol"], linea)
+
+            #TODO Comprobaciones semanticas del arbol final
+            
 
         elif self.token.cat == "CorcheteApertura":
             # <resto_instsimple> -> [<expr_simple>] opasigna <expresion>
+
+            # Atributos de los no terminales
+            Expr_simple = Atributos()
+            Expresion = Atributos()
+
             self.Avanza()
 
-            self.expr_simple()
+            self.expr_simple(Expr_simple)
 
             if self.token.cat == "CorcheteCierre":
                 self.Avanza()
             else:
+                error = True
                 self.Error(15, self.token)
                 categoriasLocal = categorias[:] + ["OpAsigna"]
                 reservadasLocal = reservadas[:]
@@ -839,6 +970,7 @@ class Sintactico:
             if self.token.cat == "OpAsigna":
                 self.Avanza()
             else:
+                error = True
                 self.Error(20, self.token)
                 categoriasLocal = categorias[:] + ["Identificador",
                                                    "Numero", "ParentesisApertura", "OpSuma"]
@@ -848,11 +980,27 @@ class Sintactico:
                 if self.token.cat == "PuntoComa" or (self.token.cat == "PalabraReservada" and self.token.palabra == "SINO"):
                     return
 
-            self.expresion()
+            self.expresion(Expresion)
+
+            # Construccion del arbol
+            if not error:
+                vector = ast.NodoAccesoVector(Resto_instsimple.at["h"], Expr_simple.at["arbol"], linea)
+
+                #TODO Comprobaciones semanticas del vector
+
+                Resto_instsimple.at["arbol"] = ast.NodoAsignacion(vector, Expresion.at["arbol"], linea)
+
+                #TODO Comprobaciones semanticas del arbol
 
         elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
             # Siguientes
-            return True
+
+            # Construccion del arbol
+            Resto_instsimple.at["arbol"] = ast.NodoAccesoVariable(Resto_instsimple.at["h"], linea)
+
+            #TODO Comprobaciones semanticas del vector
+
+            return
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
         else:
@@ -861,7 +1009,7 @@ class Sintactico:
             reservadasLocal = reservadas[:]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat in ["OpAsigna", "CorcheteApertura"]:
-                self.resto_instsimple()
+                self.resto_instsimple(copy.deepcopy(Resto_instsimple))
 
     # No Terminal Variable
     def variable(self):

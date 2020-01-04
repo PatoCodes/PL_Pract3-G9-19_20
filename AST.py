@@ -23,7 +23,7 @@ class NodoAsignacion(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 
 		self.compsem()
 
@@ -38,7 +38,7 @@ class NodoSi(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 
 		self.compsem()
 
@@ -52,7 +52,7 @@ class NodoMientras(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 
@@ -65,7 +65,7 @@ class NodoLee(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 
@@ -78,7 +78,7 @@ class NodoEscribe(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 
@@ -91,7 +91,7 @@ class NodoCompuesta(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 
@@ -111,7 +111,7 @@ class NodoComparacion(AST):
 		self.tipo = "Booleano"
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 
@@ -127,7 +127,7 @@ class NodoAritmetico(AST):
 		self.tipo = "Real"
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 
@@ -140,7 +140,7 @@ class NodoEntero(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 	
@@ -154,7 +154,7 @@ class NodoReal(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 	
@@ -167,7 +167,7 @@ class NodoBooleano(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 	
@@ -175,33 +175,64 @@ class NodoBooleano(AST):
 		return '( "BOOLEANO" "valor: %s" "linea: %s" )' % (self.valor, self.linea)
 
 class NodoAccesoVariable(AST):
-	def __init__(self, var, linea, tipo):
+	def __init__(self, var, linea):
 		self.var = var
 		self.linea = linea
-		self.tipo = tipo
+		self.tipo = "desconocido"
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
+
+	def compsem(self):
+		# Comprobamos el tipo de la variable (e indirectamente si existe)
+		tipo = ts.devuelveInfo(self.var, "tipo")
+		if tipo is None:
+			# La variable no ha sido declarada previamente
+			errores = errores + ["sin_declarar"]
+		else:
+			# Variable declarada correctamente
+			self.tipo = tipo
+
+			# Comprobamos que la variable ES una variable (no es programa ni vector)
+			if ts.devuelveInfo(self.var, "clase") != "variable":
+				errores = errores + ["clase_erronea"]
 
 	def arbol(self):
 		return '( "AccesoVariable" "v: %s" "linea: %s" )' % (self.var, self.linea)
 
 class NodoAccesoVector(AST):
-	def __init__(self, vect, exp, linea, tipo):
+	def __init__(self, vect, exp, linea):
 		self.vect = vect
 		self.exp = exp
 		self.linea = linea
-		self.tipoVar = tipo
+		self.tipo = "desconocido"
 
 		# Errores
-		self. errores = []
+		self.errores = []
 		
 		self.compsem()
 
+	def compsem(self):
+		# Comprobamos el tipo del vector (e indirectamente si existe)
+		tipo = ts.devuelveInfo(self.vect, "tipo")
+		if tipo is None:
+			# El vector no ha sido declarado previamente
+			errores = errores + ["sin_declarar"]
+		else:
+			# Vector declarado correctamente
+			self.tipo = tipo
+
+			# Comprobamos que el vector ES un vector (no es programa ni variable)
+			if ts.devuelveInfo(self.vect, "clase") != "vector":
+				errores = errores + ["clase_erronea"]
+
+		#TODO ¿Comprobacion de que el indice del vector es correcto?
+
+
 	def arbol(self):
-		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipoVar, self.linea, self.vect, self.exp)
+		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipo, self.linea, self.vect, self.exp)
 
 
 ## Nodos añadidos
@@ -213,7 +244,7 @@ class NodoSigno(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 
 		self.compsem()
         
@@ -230,7 +261,7 @@ class NodoLogico(AST):
 		self.tipo = "Booleano"
 
 		# Errores
-		self. errores = []
+		self.errores = []
 
 		self.compsem()
     
@@ -244,7 +275,7 @@ class NodoNo(AST):
 		self.linea = linea
 
 		# Errores
-		self. errores = []
+		self.errores = []
 
 		self.compsem()
 
