@@ -190,14 +190,14 @@ class NodoAccesoVariable(AST):
 		tipo = ts.devuelveInfo(self.var, "tipo")
 		if tipo is None:
 			# La variable no ha sido declarada previamente
-			errores = errores + ["sin_declarar"]
+			self.errores = self.errores + ["sin_declarar"]
 		else:
 			# Variable declarada correctamente
 			self.tipo = tipo
 
 			# Comprobamos que la variable ES una variable (no es programa ni vector)
 			if ts.devuelveInfo(self.var, "clase") != "variable":
-				errores = errores + ["clase_erronea"]
+				self.errores = self.errores + ["clase_erronea"]
 
 	def arbol(self):
 		return '( "AccesoVariable" "v: %s" "linea: %s" )' % (self.var, self.linea)
@@ -219,14 +219,14 @@ class NodoAccesoVector(AST):
 		tipo = ts.devuelveInfo(self.vect, "tipo")
 		if tipo is None:
 			# El vector no ha sido declarado previamente
-			errores = errores + ["sin_declarar"]
+			self.errores = self.errores + ["sin_declarar"]
 		else:
 			# Vector declarado correctamente
 			self.tipo = tipo
 
 			# Comprobamos que el vector ES un vector (no es programa ni variable)
 			if ts.devuelveInfo(self.vect, "clase") != "vector":
-				errores = errores + ["clase_erronea"]
+				self.errores = self.errores + ["clase_erronea"]
 
 		#TODO ¿Comprobacion de que el indice del vector es correcto?
 
