@@ -901,11 +901,8 @@ class Sintactico:
             if not error:
 
                 nodoSi = ast.NodoSi(Expresion.at["arbol"], Instruccion1.at["arbol"], Instruccion2.at["arbol"], linea)
-                # Comprobaciones semanticas
-                for error in nodoSi.errores:
-
-
-                Instruccion.at["arbol"]
+                if self.comprobacionSemanticaAST(nodoSi):
+                    Instruccion.at["arbol"] = nodoSi
 
         # <instrucción> → MIENTRAS <expresión> HACER <instrucción>
         elif self.token.cat == "PalabraReservada" and self.token.palabra == "MIENTRAS":
@@ -935,7 +932,9 @@ class Sintactico:
 
             # Construccion del arbol
             if not error:
-                Instruccion.at["arbol"] = ast.NodoMientras(Expresion.at["arbol"], Instruccion1.at["arbol"], linea)
+                nodoMientras = ast.NodoMientras(Expresion.at["arbol"], Instruccion1.at["arbol"], linea)
+                if self.comprobacionSemanticaAST(nodoMientras):
+                    Instruccion.at["arbol"] = nodoMientras
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
@@ -972,6 +971,7 @@ class Sintactico:
             self.resto_instsimple(Resto_instsimple)
 
             # Construccion del arbol
+            # (No es necesario realizar comprobaciones semanticas)
             Inst_simple.at["arbol"] = Resto_instsimple.at["arbol"]
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -1007,12 +1007,12 @@ class Sintactico:
 
             # Construccion del arbol
             variable = ast.NodoAccesoVariable(Resto_instsimple.at["h"].valor, Resto_instsimple.at["h"].linea)
+            if not self.comprobacionSemanticaAST(variable):
+                variable = ast.NodoVacio(Resto_instsimple.at["h"].linea)
 
-            #TODO Comprobaciones semanticas de variable
-
-            Resto_instsimple.at["arbol"] = ast.NodoAsignacion(variable, Expresion.at["arbol"], linea)
-
-            #TODO Comprobaciones semanticas del arbol final
+            nodoAsignacion = ast.NodoAsignacion(variable, Expresion.at["arbol"], linea)
+            if self.comprobacionSemanticaAST(nodoAsignacion):
+                Resto_instsimple.at["arbol"] = nodoAsignacion
             
 
         elif self.token.cat == "CorcheteApertura":
@@ -1056,21 +1056,20 @@ class Sintactico:
             # Construccion del arbol
             if not error:
                 vector = ast.NodoAccesoVector(Resto_instsimple.at["h"].valor, Expr_simple.at["arbol"], linea)
+                if not self.comprobacionSemanticaAST(vector):
+                    vector = ast.NodoVacio(linea)
 
-                #TODO Comprobaciones semanticas del vector
-
-                Resto_instsimple.at["arbol"] = ast.NodoAsignacion(vector, Expresion.at["arbol"], linea)
-
-                #TODO Comprobaciones semanticas del arbol
+                nodoAsignacion = ast.NodoAsignacion(vector, Expresion.at["arbol"], linea)
+                if self.comprobacionSemanticaAST(nodoAsignacion):
+                    Resto_instsimple.at["arbol"] = nodoAsignacion
 
         elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
             # Siguientes
 
             # Construccion del arbol
-            Resto_instsimple.at["arbol"] = ast.NodoAccesoVariable(Resto_instsimple.at["h"].valor, linea)
-
-            #TODO Comprobaciones semanticas del vector
-
+            accesoVariable = ast.NodoAccesoVariable(Resto_instsimple.at["h"].valor, linea)
+            if self.comprobacionSemanticaAST(accesoVariable):
+                Resto_instsimple.at["arbol"] = accesoVariable
             return
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
@@ -1107,6 +1106,7 @@ class Sintactico:
             self.resto_var(Resto_var)
 
             # Construccion del arbol
+            # (No es necesaria comprobacion semantica)
             Variable.at["arbol"] = Resto_var.at["arbol"]
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -1155,14 +1155,18 @@ class Sintactico:
 
             # Construccion del arbol
             if not error:
-                Resto_var.at["arbol"] = ast.NodoAccesoVector(Resto_var.at["h"].valor, Expr_simple.at["arbol"], linea)
+                accesoVector = ast.NodoAccesoVector(Resto_var.at["h"].valor, Expr_simple.at["arbol"], linea)
+                if self.comprobacionSemanticaAST(accesoVector):
+                    Resto_var.at["arbol"] = accesoVector
                 
 
         elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
             # Siguientes
 
             # Construccion del arbol
-            Resto_var.at["arbol"] = ast.NodoAccesoVariable(Resto_var.at["h"].valor, linea)
+            accesoVariable = ast.NodoAccesoVariable(Resto_var.at["h"].valor, linea)
+            if self.comprobacionSemanticaAST(accesoVariable):
+                Resto_var.at["arbol"] = accesoVariable
 
             return
 
@@ -1231,7 +1235,9 @@ class Sintactico:
 
             # Construccion del arbol
             if not error:
-                Inst_es.at["arbol"] = ast.NodoLee(id.valor, linea)
+                nodoLee = ast.NodoLee(id.valor, linea)
+                if self.comprobacionSemanticaAST(nodoLee):
+                    Inst_es.at["arbol"] = nodoLee
 
         # <inst_es> → ESCRIBE (<expr_simple>)
         elif self.token.cat == "PalabraReservada" and self.token.palabra == "ESCRIBE":
@@ -1268,6 +1274,7 @@ class Sintactico:
             
             # Construccion del arbol
             if not error:
+                # El nodo Escribe no tiene comprobaciones semanticas
                 Inst_es.at["arbol"] = ast.NodoEscribe(Expr_simple.at["arbol"], linea)
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -1303,6 +1310,7 @@ class Sintactico:
             self.expresionPrime(ExpresionPrime)
 
             # Construccion del arbol
+            # (No es necesaria comprobacion semantica)
             Expresion.at["arbol"] = ExpresionPrime.at["arbol"]
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -1339,15 +1347,18 @@ class Sintactico:
             self.expr_simple(Expr_simple)
 
             # Construccion del arbol
-            ExpresionPrime.at["arbol"] = ast.NodoComparacion(ExpresionPrime.at["h"], Expr_simple.at["arbol"], linea, op.operacion)
+            nodoComparacion = ast.NodoComparacion(ExpresionPrime.at["h"], Expr_simple.at["arbol"], linea, op.operacion)
+            if self.comprobacionSemanticaAST(nodoComparacion):
+                ExpresionPrime.at["arbol"] = nodoComparacion
 
         # Siguientes
         elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             ExpresionPrime.at["arbol"] = ExpresionPrime.at["h"]
 
-            return True
+            return
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
         else:
@@ -1385,6 +1396,7 @@ class Sintactico:
             self.restoexpr_simple(Resto_exprsimple)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Expr_simple.at["arbol"] = Resto_exprsimple.at["arbol"]
 
         # <expr_simple> → <signo> <término> <resto_exsimple>
@@ -1405,6 +1417,7 @@ class Sintactico:
             self.restoexpr_simple(Resto_exprsimple)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica, el nodo signo no hace comprobaciones)
             Expr_simple.at["arbol"] = ast.NodoSigno(Signo.at["signo"], Resto_exprsimple.at["arbol"], linea)
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -1441,12 +1454,16 @@ class Sintactico:
 
             self.termino(Termino)
 
-            # Atributos de los no terminales
-            Resto_exprsimple1.at["h"] = ast.NodoAritmetico(Resto_exprsimple.at["h"], Termino.at["arbol"], linea, op.operacion)
+            # Atributos de los no terminales y construccion/comprobacion del nodo aritmetico
+            Resto_exprsimple1.at["h"] = ast.NodoVacio(linea)
+            nodoAritmetico = ast.NodoAritmetico(Resto_exprsimple.at["h"], Termino.at["arbol"], linea, op.operacion)
+            if self.comprobacionSemanticaAST(nodoAritmetico):
+                Resto_exprsimple1.at["h"] = nodoAritmetico
 
             self.restoexpr_simple(Resto_exprsimple1)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Resto_exprsimple.at["arbol"] = Resto_exprsimple1.at["arbol"]
 
 
@@ -1462,17 +1479,22 @@ class Sintactico:
             self.termino(Termino)
 
             # Atributos de los no terminales
-            Resto_exprsimple1.at["h"] = ast.NodoLogico(Resto_exprsimple.at["h"], Termino.at["arbol"], linea, "O")
+            Resto_exprsimple1.at["h"] = ast.NodoVacio(linea) 
+            nodoLogico = ast.NodoLogico(Resto_exprsimple.at["h"], Termino.at["arbol"], linea, "o")
+            if self.comprobacionSemanticaAST(nodoLogico):
+                Resto_exprsimple1.at["h"] = nodoLogico
 
             self.restoexpr_simple(Resto_exprsimple1)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Resto_exprsimple.at["arbol"] = Resto_exprsimple1.at["arbol"]
 
         # Siguientes
         elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
             
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Resto_exprsimple.at["arbol"] = Resto_exprsimple.at["h"]
             
             return
@@ -1512,6 +1534,7 @@ class Sintactico:
             self.resto_term(Resto_Term)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Termino.at["arbol"] = Resto_Term.at["arbol"]
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
@@ -1548,11 +1571,16 @@ class Sintactico:
 
             self.factor(Factor)
 
-            Resto_Term1.at["h"] = ast.NodoAritmetico(Resto_Term.at["h"], Factor.at["arbol"], linea, op.operacion)
+            # Atributos de los no terminales y construccion del nodo aritmetico
+            Resto_Term1.at["h"] = ast.NodoVacio(linea)
+            nodoAritmetico = ast.NodoAritmetico(Resto_Term.at["h"], Factor.at["arbol"], linea, op.operacion)
+            if self.comprobacionSemanticaAST(nodoAritmetico):
+                Resto_Term1.at["h"] = nodoAritmetico
 
             self.resto_term(Resto_Term1)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Resto_Term.at["arbol"] = Resto_Term1.at["arbol"]
 
 
@@ -1568,11 +1596,16 @@ class Sintactico:
 
             self.factor(Factor)
 
-            Resto_Term1.at["h"] = ast.NodoLogico(Resto_Term.at["h"], Factor.at["arbol"], linea, "Y")
+            # Atributos de los no terminales y construccion del nodo logico
+            Resto_Term1.at["h"] = ast.NodoVacio(linea)
+            nodoLogico = ast.NodoLogico(Resto_Term.at["h"], Factor.at["arbol"], linea, "y")
+            if self.comprobacionSemanticaAST(nodoLogico):
+                Resto_Term1.at["h"] = nodoLogico
 
             self.resto_term(Resto_Term1)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Resto_Term.at["arbol"] = Resto_Term1.at["arbol"]
 
 
@@ -1580,6 +1613,7 @@ class Sintactico:
         elif self.token.cat in categorias or (self.token.cat == "PalabraReservada" and self.token.palabra in reservadas):
             
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Resto_Term.at["arbol"] = Resto_Term.at["h"]
             
             return
@@ -1614,6 +1648,7 @@ class Sintactico:
             self.variable(Variable)
 
             # Construccion del arbol
+            # (No hace falta comprobacion semantica)
             Factor.at["arbol"] = Variable.at["arbol"]
 
         # <factor> → num
@@ -1625,7 +1660,8 @@ class Sintactico:
             self.Avanza()
 
             # Construccion del arbol
-            if num.tipo == "Real":
+            # (La comprobacion se hace implicitamente)
+            if num.tipo == "real":
                 Factor.at["arbol"] = ast.NodoReal(num.valor, linea)
             else:
                 Factor.at["arbol"] = ast.NodoEntero(num.valor, linea)
@@ -1655,6 +1691,7 @@ class Sintactico:
                     return
             
             # Construccion del arbol
+            # (No es necesaria comprobacion semantica)
             if not error:
                 Factor.at["arbol"] = Expresion.at["arbol"]
 
@@ -1670,14 +1707,17 @@ class Sintactico:
             self.factor(Factor1)
 
             # Construccion del arbol
-            Factor.at["arbol"] = ast.NodoNo(Factor1.at["arbol"], linea)
-
+            Factor.at["arbol"] = ast.NodoVacio(linea)
+            nodoNo = ast.NodoNo(Factor1.at["arbol"], linea)
+            if self.comprobacionSemanticaAST(nodoNo):
+                Factor.at["arbol"] = nodoNo
 
         # <factor> → CIERTO
         elif self.token.cat == "PalabraReservada" and self.token.palabra == "CIERTO":            
             self.Avanza()
 
             # Construccion del arbol
+            # (1 simboliza un valor cierto)
             Factor.at["arbol"] = ast.NodoBooleano(1, linea)
 
 
@@ -1686,6 +1726,7 @@ class Sintactico:
             self.Avanza()
 
             # Construccion del arbol
+            # (1 simboliza un valor falso)
             Factor.at["arbol"] = ast.NodoBooleano(0, linea)
 
 
@@ -1710,14 +1751,9 @@ class Sintactico:
         # <signo> → -
         if self.token.cat == "OpSuma":
             
-            # Guardamos el signo
-            signo = self.token
-            
+            # Atributos de los no terminales
+            Signo.at["signo"] = self.token.operacion
             self.Avanza()
-
-            # Construccion del arbol
-            Signo.at["signo"] = signo.operacion
-
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
