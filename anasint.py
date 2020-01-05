@@ -18,7 +18,9 @@ import AST as ast
 
 # Wrapper para los atributos de los no terminales
 class Atributos:
-  at = {}
+
+    def __init__(self):
+        self.at = {}
   
 class Sintactico:
     # Constructor de la clase que implementa el Analizador Sintactico
@@ -643,7 +645,7 @@ class Sintactico:
                 if self.token.cat == "PuntoComa":
                     return
 
-            self.tipo_std(Tipo)
+            self.tipo_std(Tipo_std)
 
             # Comprobaciones semanticas
             Tipo.at["t"] = Tipo_std.at["t"]
@@ -665,6 +667,9 @@ class Sintactico:
         # Siguientes y palabras reservadas
         categorias = ["PuntoComa"]
         reservadas = []
+
+        # Atributos de los no terminales
+        Tipo_std.at["t"] = "vacio"
 
         if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
             # <Tipo_std> → ENTERO
@@ -1662,9 +1667,9 @@ class Sintactico:
             # Construccion del arbol
             # (La comprobacion se hace implicitamente)
             if num.tipo == "real":
-                Factor.at["arbol"] = ast.NodoReal(num.valor, linea)
+                Factor.at["arbol"] = ast.NodoReal(num.numero, linea)
             else:
-                Factor.at["arbol"] = ast.NodoEntero(num.valor, linea)
+                Factor.at["arbol"] = ast.NodoEntero(num.numero, linea)
 
 
         # <factor> → ( <expresión> )
@@ -1784,10 +1789,11 @@ if __name__ == "__main__":
 
     S.Programa(Programa)
     if S.aceptacion:
-        print("Analisis sintactico SATISFACTORIO. Fichero :", filename, "CORRECTO")
+        print("Analisis sintactico/semantico SATISFACTORIO. Fichero :", filename, "CORRECTO")
+        print("\nAST generado:")
     else:
-        print("Analisis sintactico CON ERRORES. Fichero :", filename, "ERRONEO")
+        print("Analisis sintactico/semantico CON ERRORES. Fichero :", filename, "ERRONEO")
+        print("\nAST generado (con posibles errores):")
 
     # Imprime el AST
-    print("\nAST generado:")
     print(Programa.at["arbol"])

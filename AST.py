@@ -16,17 +16,30 @@ class AST:
 	def arbol(self):
 		pass
 
+	# Metodo para calcular la profundidad de cada nodo. Se utilizara de cara a imprimir tabulaciones
+	# Inicialmente, todas las profundidades se inicializan a 0
+	# Las profundidades se utilizan unicamente para imprimir el arbol con profundidad
+	def calculaProfundidad(self, profundidad):
+		pass
 
 class NodoAsignacion(AST):
     def __init__(self, izda, exp, linea):
         self.izda = izda
         self.exp = exp
         self.linea = linea
+        self.profundidad = 0
 
         # Errores
         self.errores = []
 
         self.compsem()
+
+    def calculaProfundidad(self, profundidad):
+        # Calcula profundidades
+        self.profundidad = profundidad
+        self.izda.calculaProfundidad(profundidad + 1)
+        self.exp.calculaProfundidad(profundidad + 1)
+
 
     def compsem(self):
         # Se comprueba previamente en la parte izquierda si se ha declarado la variable o no
@@ -55,11 +68,19 @@ class NodoSi(AST):
 		self.si = si
 		self.sino = sino
 		self.linea = linea
+		self.profundidad = 0
 
         # Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+		self.exp.calculaProfundidad(self.profundidad + 1)
+		self.si.calculaProfundidad(self.profundidad + 1)
+		self.sino.calculaProfundidad(self.profundidad + 1)
 
 	def compsem(self):
 		
@@ -76,11 +97,18 @@ class NodoMientras(AST):
 		self.exp = exp
 		self.inst = inst
 		self.linea = linea
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+		self.exp.calculaProfundidad(self.profundidad + 1)
+		self.inst.calculaProfundidad(self.profundidad + 1)
 
 	def compsem(self):
 		
@@ -97,11 +125,16 @@ class NodoLee(AST):
 	def __init__(self, var, linea):
 		self.var = var
 		self.linea = linea
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
 
 	def compsem(self):
 
@@ -118,11 +151,16 @@ class NodoEscribe(AST):
 	def __init__(self, exp, linea):
 		self.exp = exp
 		self.linea = linea
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
 
 	def compsem(self):
 		# No son necesarias comprobaciones semanticas en el nodo Escribe
@@ -137,11 +175,20 @@ class NodoCompuesta(AST):
 	def __init__(self, lsen, linea):
 		self.lsen = lsen
 		self.linea = linea
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+	
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+
+		# Profundidades de los hijos
+		for sent in self.lsen:
+			sent.calculaProfundidad(self.profundidad + 1)
 
 	def compsem(self):
 		# No son necesarias comprobaciones semanticas en el nodo Compuesta
@@ -163,11 +210,20 @@ class NodoComparacion(AST):
 		self.linea = linea
 		self.op = op
 		self.tipo = "booleano"
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+
+		# Profundidades de los hijos
+		self.izq.calculaProfundidad(self.profundidad + 1)
+		self.dcha.calculaProfundidad(self.profundidad + 1)
 
 	def compsem(self):
 
@@ -186,11 +242,20 @@ class NodoAritmetico(AST):
 		self.linea = linea
 		self.op = op
 		self.tipo = "desconocido"
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+
+		# Profundidades de los hijos
+		self.izq.calculaProfundidad(self.profundidad + 1)
+		self.dcha.calculaProfundidad(self.profundidad + 1)
 	
 	def compsem(self):
 		
@@ -235,11 +300,16 @@ class NodoEntero(AST):
 		self.valor = valor
 		self.linea = linea
 		self.tipo = "entero"
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
 
 	def compsem(self):
 		# No hace falta comprobacion semantica
@@ -255,11 +325,16 @@ class NodoReal(AST):
 		self.valor = valor
 		self.linea = linea
 		self.tipo = "real"
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
 
 	def compsem(self):
 		# No hace falta comprobacion semantica
@@ -275,11 +350,16 @@ class NodoBooleano(AST):
 		self.valor = valor
 		self.linea = linea
 		self.tipo = "booleano"
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
 
 	def compsem(self):
 		# No hace falta comprobacion semantica
@@ -291,64 +371,74 @@ class NodoBooleano(AST):
 
 
 class NodoAccesoVariable(AST):
-    def __init__(self, var, linea):
-        self.var = var
-        self.linea = linea
-        self.tipo = "desconocido"
+	def __init__(self, var, linea):
+		self.var = var
+		self.linea = linea
+		self.tipo = "desconocido"
+		self.profundidad = 0
 
-        # Errores
-        self.errores = []
+		# Errores
+		self.errores = []
 
-        self.compsem()
+		self.compsem()
 
-    def compsem(self):
-        # Comprobamos el tipo de la variable (e indirectamente si existe)
-        tipo = ts.devuelveInfo(self.var, "tipo")
-        if tipo is None:
-            # La variable no ha sido declarada previamente
-            self.errores = self.errores + ["sin_declarar"]
-        else:
-            # Variable declarada correctamente
-            self.tipo = tipo
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
 
-            # Comprobamos que la variable ES una variable (no es programa ni vector)
-            if ts.devuelveInfo(self.var, "clase") != "variable":
-                self.errores = self.errores + ["clase_erronea"]
+	def compsem(self):
+		# Comprobamos el tipo de la variable (e indirectamente si existe)
+		tipo = ts.devuelveInfo(self.var, "tipo")
+		if tipo is None:
+			# La variable no ha sido declarada previamente
+			self.errores = self.errores + ["sin_declarar"]
+		else:
+			# Variable declarada correctamente
+			self.tipo = tipo
 
-    def arbol(self):
-        return '( "AccesoVariable" "v: %s" "tipo: %s" "linea: %s" )' % (self.var, self.tipo, self.linea)
+			# Comprobamos que la variable ES una variable (no es programa ni vector)
+			if ts.devuelveInfo(self.var, "clase") != "variable":
+				self.errores = self.errores + ["clase_erronea_var"]
+
+	def arbol(self):
+		return '( "AccesoVariable" "v: %s" "tipo: %s" "linea: %s" )' % (self.var, self.tipo, self.linea)
 
 
 class NodoAccesoVector(AST):
-    def __init__(self, vect, exp, linea):
-        self.var = vect
-        self.exp = exp
-        self.linea = linea
-        self.tipo = "desconocido"
+	def __init__(self, vect, exp, linea):
+		self.var = vect
+		self.exp = exp
+		self.linea = linea
+		self.tipo = "desconocido"
+		self.profundidad = 0
 
-        # Errores
-        self.errores = []
+		# Errores
+		self.errores = []
 
-        self.compsem()
+		self.compsem()
 
-    def compsem(self):
-        # Comprobamos el tipo del vector (e indirectamente si existe)
-        tipo = ts.devuelveInfo(self.var, "tipo")
-        if tipo is None:
-            # El vector no ha sido declarado previamente
-            self.errores = self.errores + ["sin_declarar"]
-        else:
-            # Vector declarado correctamente
-            self.tipo = tipo
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
 
-            # Comprobamos que el vector ES un vector (no es programa ni variable)
-            if ts.devuelveInfo(self.var, "clase") != "vector":
-                self.errores = self.errores + ["clase_erronea"]
+	def compsem(self):
+		# Comprobamos el tipo del vector (e indirectamente si existe)
+		tipo = ts.devuelveInfo(self.var, "tipo")
+		if tipo is None:
+			# El vector no ha sido declarado previamente
+			self.errores = self.errores + ["sin_declarar"]
+		else:
+			# Vector declarado correctamente
+			self.tipo = tipo
 
-        # TODO ¿Comprobacion de que el indice del vector es correcto?
+			# Comprobamos que el vector ES un vector (no es programa ni variable)
+			if ts.devuelveInfo(self.var, "clase") != "vector":
+				self.errores = self.errores + ["clase_erronea_vect"]
 
-    def arbol(self):
-        return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipo, self.linea, self.var, self.exp)
+		# TODO ¿Comprobacion de que el indice del vector es correcto?
+
+	def arbol(self):
+		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipo, self.linea, self.var, self.exp)
 
 
 # Nodos añadidos
@@ -358,11 +448,19 @@ class NodoSigno(AST):
 		self.signo = signo
 		self.term = term
 		self.linea = linea
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+
+		# Profundidad de los hijos
+		self.term.calculaProfundidad(self.profundidad + 1)
 	
 	def compsem(self):
 		# No son necesarias comprobaciones semanticas para este nodo
@@ -379,11 +477,20 @@ class NodoLogico(AST):
 		self.linea = linea
 		self.op = op
 		self.tipo = "booleano"
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+
+		# Profundidad de los hijos
+		self.izq.calculaProfundidad(self.profundidad + 1)
+		self.dcha.calculaProfundidad(self.profundidad + 1)
 
 	def compsem(self):
 
@@ -400,11 +507,19 @@ class NodoNo(AST):
 		self.fact = fact
 		self.linea = linea
 		self.tipo = "booleano"
+		self.profundidad = 0
 
 		# Errores
 		self.errores = []
 
 		self.compsem()
+
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+
+		# Profundidad de los hijos
+		self.fact.calculaProfundidad(self.profundidad + 1)
 
 	def compsem(self):
 
@@ -417,11 +532,16 @@ class NodoNo(AST):
 
 
 class NodoVacio(AST):
-    def __init__(self, linea):
-        self.linea = linea
+	def __init__(self, linea):
+		self.linea = linea
+		self.profundidad = 0
 
-        # Usado para identificar el nodo Vacio
-        self.tipo = "vacio"
+		# Usado para identificar el nodo Vacio
+		self.tipo = "vacio"
 
-    def arbol(self):
-        return '( "Vacio (ERROR)" "linea: %s" )' % (self.linea)
+	def calculaProfundidad(self, profundidad):
+		# Calcula profundidades
+		self.profundidad = profundidad
+
+	def arbol(self):
+		return '( "Vacio (ERROR)" "linea: %s" )' % (self.linea)
