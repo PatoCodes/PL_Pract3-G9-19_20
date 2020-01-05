@@ -62,9 +62,10 @@ class NodoSi(AST):
 		self.compsem()
 
 	def compsem(self):
-		# No son necesarias comprobaciones semanticas en el SI ENTONCES SINO
-		# (los hijos de este nodo haran sus propias comprobaciones)
-		pass
+		
+		# La expresion debe ser de tipo logico
+		if self.exp.tipo in ["entero", "real"]:
+			self.errores = self.errores + ["condicion_no_logica"]
 
 	def arbol(self):
 		return '( "Si" "linea: %s" %s\n %s\n %s\n )' % (self.linea, self.exp, self.si, self.sino)
@@ -82,9 +83,11 @@ class NodoMientras(AST):
 		self.compsem()
 
 	def compsem(self):
-		# No son necesarias comprobaciones semanticas en el MIENTRAS ENTONCES
-		# (los hijos de este nodo haran sus propias comprobaciones)
-		pass
+		
+		# La expresion debe ser de tipo logico
+		if self.exp.tipo in ["entero", "real"]:
+			self.errores = self.errores + ["condicion_no_logica"]
+
 
 	def arbol(self):
 		return '( "Mientras" "linea: %s" %s\n %s\n )' % (self.linea, self.exp, self.inst)

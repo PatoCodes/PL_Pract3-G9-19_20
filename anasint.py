@@ -223,7 +223,10 @@ class Sintactico:
                       "  ERROR: Las operaciones logicas se deben realizar entre valores logicos")
             elif nerr == 71:  # El operador NO debe contener un valor logico
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: El operador NO esperaba un valor logico")
+                      "  ERROR: Las operaciones aritmeticas no pueden contener valores logicos")
+            elif nerr == 72:  # La condicion debe ser de tipo logico
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Se esperaba una condicion de tipo logico")
                       
 
 
