@@ -67,8 +67,39 @@ class Sintactico:
         elif (self.token.cat == "EOF"):
             self.Error(99, self.token)
 
-    # Funcion que muestra los mensajes de error
+    # Funcion para comprobar e imprimir automaticamente los errores de un nodo del AST
+    # Devuelve TRUE si no ha habido errores, FALSE si ha habido errores
+    def comprobacionSemanticaAST(self, nodo):
 
+        # Como error espera un token, se crea un token "falso" para pasarselo con la linea
+        token = componentes.Punto(nodo.linea)
+
+        # Comprobamos uno a uno los errores para imprimir el mensaje apropiado
+        for error in nodo.errores:
+            if error == "asignacion_invalida":
+                self.Error(72, token)
+            elif error == "condicion_no_logica":
+                self.Error(71, token)
+            elif error == "clase_erronea_lee":
+                self.Error(64, token)
+            elif error == "tipo_erroneo_comp":
+                self.Error(65, token)
+            elif error == "tipo_erroneo_arit":
+                self.Error(66, token)
+            elif error == "sin_declarar":
+                self.Error(67, token, id = nodo.var)
+            elif error == "clase_erronea_var":
+                self.Error(68, token, id = nodo.var)
+            elif error == "clase_erronea_vect":
+                self.Error(69, token, id = nodo.var)
+            elif error == "tipo_erroneo_log":
+                self.Error(70, token)
+            
+        # Devolvemos valor adecuado
+        return len(nodo.errores) == 0
+
+
+    # Funcion que muestra los mensajes de error
     def Error(self, nerr, tok, **opcional):
         # Los mensajes de error se imprimen únicamente si no se ha alcanzado un final de fichero inesperado
         self.aceptacion = False
@@ -220,13 +251,13 @@ class Sintactico:
                       "  ERROR: Se esperaba un vector, el identificador " + str(opcional["id"]) + " no lo es")
             elif nerr == 70:  # Hay numeros en una operacion logica
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: Las operaciones logicas se deben realizar entre valores logicos")
-            elif nerr == 71:  # El operador NO debe contener un valor logico
-                print("Linea: " + str(tok.linea) +
-                      "  ERROR: Las operaciones aritmeticas no pueden contener valores logicos")
-            elif nerr == 72:  # La condicion debe ser de tipo logico
+                      "  ERROR: Las operaciones logicas solo pueden contener valores logicos")
+            elif nerr == 71:  # La condicion debe ser de tipo logico
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Se esperaba una condicion de tipo logico")
+            elif nerr == 72:  # El tipo de la variable no concuerda con el de la asignacion
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: El valor que se intenta asignar a la variable no es compatible con el tipo de la variable")
                       
 
 
@@ -292,7 +323,7 @@ class Sintactico:
 
                 # Comprobamos errores en la produccion
                 if not error:
-                    # Produccion analizada correctamente, se genera el arbol
+                    # Construccion
                     Programa.at["arbol"] = Instrucciones.at["arbol"]
 
                 self.Avanza()
@@ -683,8 +714,10 @@ class Sintactico:
             if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
 
                 # Analisis correcto, creacion del arbol
+                # (No hay comprobaciones semanticas en el arbol)
                 Instrucciones.at["arbol"] = ast.NodoCompuesta(Lista_inst.at["lista"], linea)
                 self.Avanza()
+
             else:
                 self.Error(12, self.token)
                 categoriasLocal = categorias[:]
@@ -785,6 +818,7 @@ class Sintactico:
             if self.token.cat == "PalabraReservada" and self.token.palabra == "FIN":
 
                 # Construccion del arbol
+                # (No son necesarias comprobaciones semanticas)
                 Instruccion.at["arbol"] = ast.NodoCompuesta(Lista_inst.at["lista"], linea)
 
                 self.Avanza()
@@ -806,6 +840,7 @@ class Sintactico:
             self.inst_simple(Inst_simple)
 
             # Construccion del arbol
+            # (No es necesario realizar comprobaciones semanticas)
             Instruccion.at["arbol"] = Inst_simple.at["arbol"]
 
         # <instrucción> → <inst_es>
@@ -817,6 +852,7 @@ class Sintactico:
             self.inst_es(Inst_es)
 
             # Construccion del arbol
+            # (No es necesario realizar comprobaciones semanticas)
             Instruccion.at["arbol"] = Inst_es.at["arbol"]
 
         # <instrucción> →  SI <expresion> ENTONCES <instrucción> SINO <instrucción>
@@ -863,7 +899,13 @@ class Sintactico:
 
             # Construccion del arbol
             if not error:
-                Instruccion.at["arbol"] = ast.NodoSi(Expresion.at["arbol"], Instruccion1.at["arbol"], Instruccion2.at["arbol"], linea)
+
+                nodoSi = ast.NodoSi(Expresion.at["arbol"], Instruccion1.at["arbol"], Instruccion2.at["arbol"], linea)
+                # Comprobaciones semanticas
+                for error in nodoSi.errores:
+
+
+                Instruccion.at["arbol"]
 
         # <instrucción> → MIENTRAS <expresión> HACER <instrucción>
         elif self.token.cat == "PalabraReservada" and self.token.palabra == "MIENTRAS":

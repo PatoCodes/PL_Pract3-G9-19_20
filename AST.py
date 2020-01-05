@@ -108,7 +108,7 @@ class NodoLee(AST):
 		# Se deben leer unicamente variables simples (no se permite leer identificadores que sean vectores o programa)
 		clase = ts.devuelveInfo(self.var, "clase")
 		if clase != "variable":
-			errores = errores + ["clase_erronea"]
+			errores = errores + ["clase_erronea_lee"]
 
 	def arbol(self):
 		return '( "Lee" "linea: %s" %s )' % (self.linea, self.var)
