@@ -200,6 +200,32 @@ class Sintactico:
             elif nerr == 63:  # Los vectores no pueden tener tamaño negativo
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: El tamaño del vector no puede ser cero")
+            elif nerr == 64:  # Se intenta leer una variable no simple
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: La instruccion LEE solo permite utilizar variables simples (no se permiten vectores)")
+            elif nerr == 65:  # Hay booleanos en una comparacion
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Las comparaciones deben ser realizadas entre expresiones numericas")
+            elif nerr == 66:  # Hay booleanos en una operacion aritmetica
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Las operaciones aritmeticas no pueden contener valores de tipo logico")
+            elif nerr == 67:  # Se intenta acceder a una variable no declarada
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: El identificador " + str(opcional["id"]) + " no ha sido declarado previamente")
+            elif nerr == 68:  # Se esperaba una variable simple
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Se esperaba una variable simple, el identificador " + str(opcional["id"]) + " no lo es")
+            elif nerr == 69:  # Se esperaba un vector
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Se esperaba un vector, el identificador " + str(opcional["id"]) + " no lo es")
+            elif nerr == 70:  # Hay numeros en una operacion logica
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Las operaciones logicas se deben realizar entre valores logicos")
+            elif nerr == 71:  # El operador NO debe contener un valor logico
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: El operador NO esperaba un valor logico")
+                      
+
 
             # ERROR EOF (99)
             elif nerr == 99:  # Final de fichero inesperado
