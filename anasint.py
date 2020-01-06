@@ -98,6 +98,8 @@ class Sintactico:
                 self.Error(70, token)
             elif error == "tipo_erroneo_signo":
                 self.Error(72, token)
+            elif error == "tipo_erroneo_lee":
+                self.Error(73, token)
             
         # Devolvemos valor adecuado
         return len(nodo.errores) == 0
@@ -268,6 +270,9 @@ class Sintactico:
             elif nerr == 73:  # Las expresiones logicas no pueden tener signo
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: No se puede aplicar un signo a las expresiones logicas")
+            elif nerr == 74:  # LEE solo permite leer variables numericas
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: La instruccion LEE solo permite acceder a variables numericas")
                       
             # ERROR EOF (99)
             elif nerr == 99:  # Final de fichero inesperado

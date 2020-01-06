@@ -141,10 +141,14 @@ class NodoLee(AST):
 
 	def compsem(self):
 
-		# Se deben leer unicamente variables simples (no se permite leer identificadores que sean vectores o programa)
+		# Se deben leer unicamente variables simples (no se permite leer identificadores que sean vectores o programa) y que sean ENTERO O REAL
 		clase = ts.devuelveInfo(self.var, "clase")
 		if clase != "variable":
 			errores = errores + ["clase_erronea_lee"]
+		else:
+			tipo = ts.devuelveInfo(self.var, "tipo")
+			if tipo == "booleano":
+				errores = errores + ["tipo_erroneo_lee"]
 
 	def arbol(self):
 		tabulacion = self.profundidad * '    '
@@ -446,8 +450,6 @@ class NodoAccesoVector(AST):
 			# Comprobamos que el vector ES un vector (no es programa ni variable)
 			if ts.devuelveInfo(self.var, "clase") != "vector":
 				self.errores = self.errores + ["clase_erronea_vect"]
-
-		# TODO ¿Comprobacion de que el indice del vector es correcto?
 
 	def arbol(self):
 		tabulacion = self.profundidad * '    '
