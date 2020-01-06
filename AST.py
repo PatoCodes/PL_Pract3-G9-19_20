@@ -59,7 +59,8 @@ class NodoAsignacion(AST):
             self.errores = self.errores + ["asignacion_invalida"]
 
     def arbol(self):
-        return '( "Asignacion"\n  "linea: %s" \n%s\n%s\n)' % (self.linea, self.izda, self.exp)
+        tabulacion = self.profundidad * '    '
+        return tabulacion + '("Asignacion" "linea: {linea}"\n{izda}\n{exp}\n'.format(linea = self.linea, izda = self.izda, exp = self.exp) + tabulacion + ')'
 
 
 class NodoSi(AST):
@@ -89,7 +90,8 @@ class NodoSi(AST):
 			self.errores = self.errores + ["condicion_no_logica"]
 
 	def arbol(self):
-		return '( "Si" "linea: %s" %s\n %s\n %s\n )' % (self.linea, self.exp, self.si, self.sino)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Si" "linea: {linea}"\n{exp}\n{si}\n{sino}\n'.format(linea = self.linea, exp = self.exp, si = self.si, sino = self.sino) + tabulacion + ')'
 
 
 class NodoMientras(AST):
@@ -118,7 +120,8 @@ class NodoMientras(AST):
 
 
 	def arbol(self):
-		return '( "Mientras" "linea: %s" %s\n %s\n )' % (self.linea, self.exp, self.inst)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Mientras" "linea: {linea}"\n{exp}\n{inst}\n'.format(linea = self.linea, exp = self.exp, inst = self.inst) + tabulacion + ')'
 
 
 class NodoLee(AST):
@@ -144,7 +147,8 @@ class NodoLee(AST):
 			errores = errores + ["clase_erronea_lee"]
 
 	def arbol(self):
-		return '( "Lee" "linea: %s" %s )' % (self.linea, self.var)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Lee" "var: {var}" "linea: {linea}")'.format(linea = self.linea, var = self.var)
 
 
 class NodoEscribe(AST):
@@ -161,6 +165,7 @@ class NodoEscribe(AST):
 	def calculaProfundidad(self, profundidad):
 		# Calcula profundidades
 		self.profundidad = profundidad
+		self.exp.calculaProfundidad(self.profundidad + 1)
 
 	def compsem(self):
 		# No son necesarias comprobaciones semanticas en el nodo Escribe
@@ -168,7 +173,8 @@ class NodoEscribe(AST):
 		pass
 
 	def arbol(self):
-		return '( "Escribe" "linea: %s" %s )' % (self.linea, self.exp)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Escribe" "linea: {linea}"\n{exp}\n'.format(linea = self.linea, exp = self.exp) + tabulacion + ')'
 
 
 class NodoCompuesta(AST):
@@ -196,11 +202,11 @@ class NodoCompuesta(AST):
 		pass
 
 	def arbol(self):
-		r = ""
+		tabulacion = self.profundidad * '    '
+		compuesta = tabulacion + '("Compuesta" "linea: {linea}"\n'.format(linea = self.linea)
 		for sent in self.lsen:
-			r += sent.arbol()+"\n"
-
-		return '( "Compuesta"\n %s)' % r
+			compuesta += sent.arbol() + '\n'
+		return compuesta + tabulacion + ')'
 
 
 class NodoComparacion(AST):
@@ -232,7 +238,8 @@ class NodoComparacion(AST):
 			errores = errores + ["tipo_erroneo_comp"]
 
 	def arbol(self):
-		return '( "Comparacion" "op: %s" "tipo: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.tipo, self.linea, self.izq, self.dcha)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Comparacion" "op: {op}" "tipo: {tipo}" "linea: {linea}"\n{izq}\n{dcha}\n'.format(op = self.op, tipo = self.tipo, linea = self.linea, izq = self.izq, dcha = self.dcha) + tabulacion + ')'
 
 
 class NodoAritmetico(AST):
@@ -292,7 +299,8 @@ class NodoAritmetico(AST):
 				self.tipo = "real"
 
 	def arbol(self):
-		return '( "Aritmetica" "op: %s" "tipo: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.tipo, self.linea, self.izq, self.dcha)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Aritmetica" "op: {op}" "tipo: {tipo}" "linea: {linea}"\n{izq}\n{dcha}\n'.format(op = self.op, tipo = self.tipo, linea = self.linea, izq = self.izq, dcha = self.dcha) + tabulacion + ')'
 
 
 class NodoEntero(AST):
@@ -317,7 +325,8 @@ class NodoEntero(AST):
 		pass
 
 	def arbol(self):
-		return '( "Entero" "valor: %s" "tipo: entero" "linea: %s" )' % (self.valor, self.linea)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Entero" "valor: {valor}" "tipo: {tipo}" "linea: {linea}")'.format(valor = self.valor, tipo = self.tipo, linea = self.linea)
 
 
 class NodoReal(AST):
@@ -342,7 +351,8 @@ class NodoReal(AST):
 		pass
 
 	def arbol(self):
-		return '( "Real" "valor: %s" "tipo: real" "linea: %s" )' % (self.valor, self.linea)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Real" "valor: {valor}" "tipo: {tipo}" "linea: {linea}")'.format(valor = self.valor, tipo = self.tipo, linea = self.linea)
 
 
 class NodoBooleano(AST):
@@ -367,7 +377,8 @@ class NodoBooleano(AST):
 		pass
 
 	def arbol(self):
-		return '( "Booleano" "valor: %s" "tipo: booleano" "linea: %s" )' % (self.valor, self.linea)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Booleano" "valor: {valor}" "tipo: {tipo}" "linea: {linea}")'.format(valor = self.valor, tipo = self.tipo, linea = self.linea)
 
 
 class NodoAccesoVariable(AST):
@@ -401,7 +412,8 @@ class NodoAccesoVariable(AST):
 				self.errores = self.errores + ["clase_erronea_var"]
 
 	def arbol(self):
-		return '( "AccesoVariable" "v: %s" "tipo: %s" "linea: %s" )' % (self.var, self.tipo, self.linea)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("AccesoVariable" "var: {var}" "tipo: {tipo}" "linea: {linea}")'.format(var = self.var, tipo = self.tipo, linea = self.linea)
 
 
 class NodoAccesoVector(AST):
@@ -438,7 +450,8 @@ class NodoAccesoVector(AST):
 		# TODO ¿Comprobacion de que el indice del vector es correcto?
 
 	def arbol(self):
-		return '( "AccesoVector" "tipo: %s" "linea: %s" %s\n %s\n)' % (self.tipo, self.linea, self.var, self.exp)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("AccesoVector" "var: {var}" "tipo: {tipo}" "linea: {linea}"\n{exp}\n'.format(var = self.var, tipo = self.tipo, linea = self.linea, exp = self.exp) + tabulacion + ')'
 
 
 # Nodos añadidos
@@ -449,6 +462,7 @@ class NodoSigno(AST):
 		self.term = term
 		self.linea = linea
 		self.profundidad = 0
+		self.tipo = "desconocido"
 
 		# Errores
 		self.errores = []
@@ -463,11 +477,21 @@ class NodoSigno(AST):
 		self.term.calculaProfundidad(self.profundidad + 1)
 	
 	def compsem(self):
-		# No son necesarias comprobaciones semanticas para este nodo
-		pass
+		# TODO: Comprueba que es numerico y pon tipo adecuado
+
+		# El tipo del termino debe ser numerico (no puede ser booleano)
+		if self.term.tipo == "booleano":
+			errores = errores + ["tipo_erroneo_signo"]
+		else:
+			# Ponemos el tipo adecuado al signo.
+			# (si la expresion es de tipo Vacio, tomamos tipo real por defecto)
+			self.tipo = self.term.tipo
+			if self.tipo == "vacio":
+				self.tipo == "real"
 
 	def arbol(self):
-		return '( "Signo" "valor: %s" "linea: %s" \n %s\n)' % (self.signo, self.linea, self.term)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Signo" "signo: {signo}" "tipo: {tipo}" "linea: {linea}"\n{term}\n'.format(signo = self.signo, tipo = self.tipo, linea = self.linea, term = self.term) + tabulacion + ')'
 
 
 class NodoLogico(AST):
@@ -499,7 +523,8 @@ class NodoLogico(AST):
 			self.errores = self.errores + ["tipo_erroneo_log"]
 
 	def arbol(self):
-		return '( "Logica" "op: %s" "tipo: %s" "linea: %s" \n %s\n %s\n)' % (self.op, self.tipo, self.linea, self.izq, self.dcha)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Logica" "op: {op}" "tipo: {tipo}" "linea: {linea}"\n{izq}\n{dcha}\n'.format(op = self.op, tipo = self.tipo, linea = self.linea, izq = self.izq, dcha = self.dcha) + tabulacion + ')'
 
 
 class NodoNo(AST):
@@ -528,7 +553,8 @@ class NodoNo(AST):
 			self.errores = self.errores + ["tipo_erroneo_log"]
 
 	def arbol(self):
-		return '( "No" "tipo: booleano" "linea: %s" \n %s\n)' % (self.linea, self.fact)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("No" "tipo: {tipo}" "linea: {linea}"\n{fact}\n'.format(tipo = self.tipo, linea = self.linea, fact = self.fact) + tabulacion + ')'
 
 
 class NodoVacio(AST):
@@ -544,4 +570,5 @@ class NodoVacio(AST):
 		self.profundidad = profundidad
 
 	def arbol(self):
-		return '( "Vacio (ERROR)" "linea: %s" )' % (self.linea)
+		tabulacion = self.profundidad * '    '
+		return tabulacion + '("Vacio (ERROR)" "linea: {linea}")'.format(linea = self.linea)

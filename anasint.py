@@ -96,6 +96,8 @@ class Sintactico:
                 self.Error(69, token, id = nodo.var)
             elif error == "tipo_erroneo_log":
                 self.Error(70, token)
+            elif error == "tipo_erroneo_signo":
+                self.Error(72, token)
             
         # Devolvemos valor adecuado
         return len(nodo.errores) == 0
@@ -260,9 +262,10 @@ class Sintactico:
             elif nerr == 72:  # El tipo de la variable no concuerda con el de la asignacion
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: El valor que se intenta asignar a la variable no es compatible con el tipo de la variable")
+            elif nerr == 73:  # Las expresiones logicas no pueden tener signo
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: No se puede aplicar un signo a las expresiones logicas")
                       
-
-
             # ERROR EOF (99)
             elif nerr == 99:  # Final de fichero inesperado
                 print("Linea: " + str(tok.linea) +
@@ -1422,8 +1425,9 @@ class Sintactico:
             self.restoexpr_simple(Resto_exprsimple)
 
             # Construccion del arbol
-            # (No hace falta comprobacion semantica, el nodo signo no hace comprobaciones)
-            Expr_simple.at["arbol"] = ast.NodoSigno(Signo.at["signo"], Resto_exprsimple.at["arbol"], linea)
+            nodoSigno = ast.NodoSigno(Signo.at["signo"], Resto_exprsimple.at["arbol"], linea)
+            if self.comprobacionSemanticaAST(nodoSigno):
+                Expr_simple.at["arbol"] = nodoSigno 
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
@@ -1722,8 +1726,7 @@ class Sintactico:
             self.Avanza()
 
             # Construccion del arbol
-            # (1 simboliza un valor cierto)
-            Factor.at["arbol"] = ast.NodoBooleano(1, linea)
+            Factor.at["arbol"] = ast.NodoBooleano("cierto", linea)
 
 
         # <factor> → FALSO
@@ -1731,8 +1734,7 @@ class Sintactico:
             self.Avanza()
 
             # Construccion del arbol
-            # (1 simboliza un valor falso)
-            Factor.at["arbol"] = ast.NodoBooleano(0, linea)
+            Factor.at["arbol"] = ast.NodoBooleano("falso", linea)
 
 
         # No se ha encontrado ningún primero, sincronizacion
@@ -1795,5 +1797,6 @@ if __name__ == "__main__":
         print("Analisis sintactico/semantico CON ERRORES. Fichero :", filename, "ERRONEO")
         print("\nAST generado (con posibles errores):")
 
-    # Imprime el AST
+    # Calcula profundidades e imprime el arbol
+    Programa.at["arbol"].calculaProfundidad(0)
     print(Programa.at["arbol"])
