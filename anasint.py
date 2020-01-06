@@ -221,6 +221,9 @@ class Sintactico:
             elif nerr == 38:  # El programa debe tener un identificador
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: El programa debe incluir un identificador para nombrarlo")
+            elif nerr == 39:  # Se esperaba una instruccion valida
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Se esperaba una instruccion valida")
 
             # ERRORES SEMANTICOS (60 - 98)
             elif nerr == 60:  # No se puede repetir el nombre de los componentes
@@ -793,13 +796,13 @@ class Sintactico:
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
         else:
-            self.Error(12, self.token)
+            self.Error(39, self.token)
             categoriasLocal = categorias[:] + ["Identificador"]
             reservadasLocal = reservadas[:] + \
                 ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
             if self.token.cat == "Identificador" or (self.token.cat == "PalabraReservada" and self.token.palabra in ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]):
-                self.lista_inst(copy.deepcopy(Lista_inst))
+                self.lista_inst(Lista_inst)
 
     # No Terminal Instruccion
     def instruccion(self, Instruccion):
