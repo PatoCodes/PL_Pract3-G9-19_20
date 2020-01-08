@@ -85,7 +85,7 @@ class NodoSi(AST):
 
 	def compsem(self):
 		
-		# La expresion debe ser de tipo logico
+		# La condicion debe ser de tipo logico
 		if self.exp.tipo in ["entero", "real"]:
 			self.errores = self.errores + ["condicion_no_logica"]
 
@@ -114,7 +114,7 @@ class NodoMientras(AST):
 
 	def compsem(self):
 		
-		# La expresion debe ser de tipo logico
+		# La condicion debe ser de tipo logico
 		if self.exp.tipo in ["entero", "real"]:
 			self.errores = self.errores + ["condicion_no_logica"]
 

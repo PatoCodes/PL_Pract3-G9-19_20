@@ -547,6 +547,7 @@ class Sintactico:
             self.lista_id(Lista_id)
 
             # Comprobaciones semanticas
+            # (Evitamos problemas en caso de fallo en lista_id)
             if "lista" in Lista_id.at:
                 Resto_listaid.at["lista"] = Lista_id.at["lista"]
             else:
