@@ -88,7 +88,7 @@ class PalabraReservada(Componente):
   def __init__(self, nl, palabra):
 	  Componente.__init__(self)
 	  self.linea = nl
-	  # PROGRAMA,  VAR,  VECTOR,  ENTERO,  REAL,  BOOLEANO,  INICIO,  FIN,  SI,  ENTON-CES, SINO, MIENTRAS, HACER, LEE, ESCRIBE, Y, O, NO, CIERTO y FALSO.
+	  # PROGRAMA,  VAR,  VECTOR,  ENTERO,  REAL,  BOOLEANO,  INICIO,  FIN,  SI,  ENTONCES, SINO, MIENTRAS, HACER, LEE, ESCRIBE, Y, O, NO, CIERTO y FALSO.
 	  self.palabra = palabra
 	
 # componente lexico. operadores relacionales 
@@ -100,16 +100,6 @@ class OpRelacional(Componente):
 
 
 # componente lexico. llaves, parentesis y corchetes 
-
-class LlaveApertura(Componente):
-  def __init__(self,nl):
-    Componente.__init__(self)
-    self.linea=nl
-	
-class LlaveCierre(Componente):
-  def __init__(self,nl):
-    Componente.__init__(self)
-    self.linea=nl
 		
 class ParentesisApertura(Componente):
   def __init__(self,nl):

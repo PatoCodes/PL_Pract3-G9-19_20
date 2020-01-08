@@ -175,10 +175,6 @@ class Analex:
       return componentes.ParentesisApertura(self.nlinea)
     elif ch ==")":
       return componentes.ParentesisCierre(self.nlinea)
-    elif ch =="{":
-      return componentes.LlaveApertura(self.nlinea)
-    elif ch =="}":
-      return componentes.LlaveCierre(self.nlinea)
     elif ch =="[":
       return componentes.CorcheteApertura(self.nlinea)
     elif ch =="]":
