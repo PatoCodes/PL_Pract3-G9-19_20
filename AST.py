@@ -436,6 +436,7 @@ class NodoAccesoVector(AST):
 	def calculaProfundidad(self, profundidad):
 		# Calcula profundidades
 		self.profundidad = profundidad
+		self.exp.calculaProfundidad(profundidad + 1)
 
 	def compsem(self):
 		# Comprobamos el tipo del vector (e indirectamente si existe)

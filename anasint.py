@@ -29,13 +29,15 @@ class Sintactico:
         self.lexico = lexico
         self.token = self.lexico.Analiza()
 
-        # Se prepara un booleano global que indica aceptación o rechazo del programa. Por defecto, los programas se aceptan (y se rechazan cuando se encuentra un error)
+        # Se prepara un booleano global que indica aceptación o rechazo del programa. 
+        # Por defecto, los programas se aceptan (y se rechazan cuando se encuentra un error)
+        # Este booleano se cambiará en el momento que se imprima un mensaje de error
         self.aceptacion = True
 
         # Booleano global para indicar un final de fichero inesperado. Utilizado para el tratamiento de errores
         self.finFichero = False
 
-        # Token leido previamente. Utilizado para algunos mensajes de error
+        # Token leido previamente. Utilizado para indicar la linea en algunos mensajes de error
         self.tokenAnterior = None
 
     # Wrapper para obtener el siguiente componente léxico
@@ -106,6 +108,7 @@ class Sintactico:
 
 
     # Funcion que muestra los mensajes de error
+    # Cualquier llamada a esta función marcará el analisis como fallido (se ha encontrrado un error, ya sea sintáctico o semántico)
     def Error(self, nerr, tok, **opcional):
         # Los mensajes de error se imprimen únicamente si no se ha alcanzado un final de fichero inesperado
         self.aceptacion = False
@@ -577,6 +580,8 @@ class Sintactico:
         categorias = ["PuntoComa"]
         reservadas = []
 
+        # Para evitar errores de ejecucion, se declara un tipo de antemano
+        Tipo.at["t"] = "vacio"
         # <Tipo> → <tipo_std>
         if self.token.cat == "PalabraReservada" and self.token.palabra in ["ENTERO", "REAL", "BOOLEANO"]:
 
