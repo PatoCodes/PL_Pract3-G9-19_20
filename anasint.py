@@ -201,10 +201,12 @@ class Sintactico:
                       "  ERROR: Se esperaba un identificador, un número, un signo '+' o un '-' un '(', un 'NO', un 'CIERTO', o un 'FALSO'")
             elif nerr == 30:  # resto_exprsimple
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'")
+                      #"  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'"
+                      "  ERROR: Instrucción incompleta o no cerrada con ';'")
             elif nerr == 31:  # resto_term
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: Se esperaba un operador de suma, multiplicación o relacional; un ')', un ';',un 'HACER', un 'SINO' o un 'ENTONCES'")
+                      #"  ERROR: Se esperaba un operador de suma, multiplicación o relacional; un ')', un ';', un 'HACER', un 'SINO' o un 'ENTONCES'"
+                      "  ERROR: Instrucción incompleta o no cerrada con ';'")
             elif nerr == 32:  # factor
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Se esperaba un identificador, un número, un operador un '(', un 'NO', un 'CIERTO', un 'FALSO', un 'HACER', un 'SINO' o un 'ENTONCES'")
