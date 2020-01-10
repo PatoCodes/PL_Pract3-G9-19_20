@@ -215,7 +215,7 @@ class Sintactico:
                       "  ERROR: Se esperaba un símbolo '+' o un '-'")
             elif nerr == 34:  # HACER
                 print("Linea: " + str(tok.linea) +
-                      "  ERROR: Se esperaba 'HACER'")
+                      "  ERROR: Se esperaba un 'HACER'")
             elif nerr == 35:  # Termino
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Se esperaba un identificador, un numero, un '(' o las palabras reservadas NO, CIERTO o FALSO")
