@@ -109,6 +109,8 @@ class Sintactico:
 
     # Funcion que muestra los mensajes de error
     # Cualquier llamada a esta función marcará el analisis como fallido (se ha encontrrado un error, ya sea sintáctico o semántico)
+
+    # Es posible que algunos mensajes de error no sean utilizados finalmente, habiendo sido sustituidos por otros o deprecados
     def Error(self, nerr, tok, **opcional):
         # Los mensajes de error se imprimen únicamente si no se ha alcanzado un final de fichero inesperado
         self.aceptacion = False
@@ -201,12 +203,10 @@ class Sintactico:
                       "  ERROR: Se esperaba un identificador, un número, un signo '+' o un '-' un '(', un 'NO', un 'CIERTO', o un 'FALSO'")
             elif nerr == 30:  # resto_exprsimple
                 print("Linea: " + str(tok.linea) +
-                      #"  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'"
-                      "  ERROR: Instrucción incompleta o no cerrada con ';'")
+                      "  ERROR: Se esperaba un signo '+' o uno '-', un ')', un ';', un 'O',un 'HACER', un 'SINO' o un 'ENTONCES'")
             elif nerr == 31:  # resto_term
                 print("Linea: " + str(tok.linea) +
-                      #"  ERROR: Se esperaba un operador de suma, multiplicación o relacional; un ')', un ';', un 'HACER', un 'SINO' o un 'ENTONCES'"
-                      "  ERROR: Instrucción incompleta o no cerrada con ';'")
+                      "  ERROR: Se esperaba un operador de suma, multiplicación o relacional; un ')', un ';', un 'HACER', un 'SINO' o un 'ENTONCES'")
             elif nerr == 32:  # factor
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Se esperaba un identificador, un número, un operador un '(', un 'NO', un 'CIERTO', un 'FALSO', un 'HACER', un 'SINO' o un 'ENTONCES'")
@@ -231,6 +231,12 @@ class Sintactico:
             elif nerr == 39:  # Se esperaba una instruccion valida
                 print("Linea: " + str(tok.linea) +
                       "  ERROR: Se esperaba una instruccion valida")
+            elif nerr == 40:  # Instrucción incompleta
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Instruccion incompleta, erronea o no cerrada con ;")
+            elif nerr == 41:  # Expresion incompleta
+                print("Linea: " + str(tok.linea) +
+                      "  ERROR: Expresion incompleta o erronea")
 
             # ERRORES SEMANTICOS (60 - 98)
             elif nerr == 60:  # No se puede repetir el nombre de los componentes
@@ -784,7 +790,7 @@ class Sintactico:
                 self.Avanza()
             else:
                 error = True
-                self.Error(37, self.tokenAnterior)
+                self.Error(40, self.tokenAnterior)
                 categoriasLocal = categorias[:] + ["Identificador"]
                 reservadasLocal = reservadas[:] + \
                     ["INICIO", "LEE", "ESCRIBE", "SI", "MIENTRAS"]
@@ -1447,7 +1453,7 @@ class Sintactico:
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
-            self.Error(29, self.token)
+            self.Error(41, self.token)
             categoriasLocal = categorias[:] + ["Identificador",
                                                "Numero", "ParentesisApertura", "OpSuma"]
             reservadasLocal = reservadas[:] + ["NO", "CIERTO", "FALSO"]
@@ -1526,7 +1532,7 @@ class Sintactico:
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
-            self.Error(30, self.token)
+            self.Error(41, self.token)
             categoriasLocal = categorias[:] + ["OpSuma"]
             reservadasLocal = reservadas[:] + ["O"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
@@ -1564,7 +1570,7 @@ class Sintactico:
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
         else:
-            self.Error(35, self.token)
+            self.Error(41, self.token)
             categoriasLocal = categorias[:] + \
                 ["Identificador", "Numero", "ParentesisApertura"]
             reservadasLocal = reservadas[:] + ["NO", "CIERTO", "FALSO"]
@@ -1645,7 +1651,7 @@ class Sintactico:
 
         # No se ha encontrado ningún primero ni siguientes, sincronizacion
         else:
-            self.Error(31, self.tokenAnterior)
+            self.Error(41, self.tokenAnterior)
             categoriasLocal = categorias[:] + ["OpMultiplicacion"]
             reservadasLocal = reservadas[:] + ["Y"]
             self.Sincroniza(categoriasLocal, reservadasLocal, None, None)
@@ -1755,7 +1761,7 @@ class Sintactico:
 
         # No se ha encontrado ningún primero, sincronizacion
         else:
-            self.Error(32, self.token)
+            self.Error(41, self.token)
             categoriasLocal = categorias[:] + \
                 ["Identificador", "Numero", "ParentesisApertura"]
             reservadasLocal = reservadas[:] + ["NO", "CIERTO", "FALSO"]
