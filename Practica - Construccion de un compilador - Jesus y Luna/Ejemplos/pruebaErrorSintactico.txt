@@ -1,0 +1,10 @@
+PROGRAMA ; //COMENTARIO DE PRUEBA
+VAR a: ENTERO;
+	b: REAL
+INICIO
+	MIENTRAS 1 <> 2 HACER
+		a := 2;
+	LEE(a)
+	a := 1+2
+	a := 1+3;
+FIN.

@@ -1,0 +1,10 @@
+PROGRAMA p1; //COMENTARIO DE PRUEBA
+VAR a: BOOLEANO;
+	b, a, programa: ENTERO;
+INICIO
+	MIENTRAS 1 + 2 HACER
+		INICIO
+			b := 1 < 2;
+			a[1] := CIERTO; 
+		FIN;
+FIN.
